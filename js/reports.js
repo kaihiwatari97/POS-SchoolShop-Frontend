@@ -1,4 +1,4 @@
-requireAuth();
+requireAdmin();
 
 let allSales = [];
 let currentFilter = 'day';

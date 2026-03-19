@@ -12,11 +12,14 @@ async function loadProducts() {
 function renderProducts(list) {
     const tbody = document.getElementById('products-table');
     if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-3 text-gray-400">Sin productos</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-3 text-gray-400">Sin productos</td></tr>';
         return;
     }
     tbody.innerHTML = list.map(p => `
         <tr class="border-t hover:bg-gray-50 ${p.stock === 0 ? 'bg-red-50' : p.stock <= 5 ? 'bg-orange-50' : ''}">
+            <td class="px-4 py-3">
+                ${p.imageUrl ? `<img src="${p.imageUrl}" class="w-10 h-10 rounded object-cover">` : '<div class="w-10 h-10 rounded bg-gray-200"></div>'}
+            </td>
             <td class="px-4 py-3 font-semibold">${p.name}</td>
             <td class="px-4 py-3 text-gray-500">${p.description || '—'}</td>
             <td class="px-4 py-3 font-semibold">$${p.price}</td>
@@ -46,6 +49,9 @@ function renderProducts(list) {
 function openProductModal(id = null) {
     editingId = id;
     document.getElementById('modal-title').textContent = id ? 'Editar producto' : 'Agregar producto';
+    document.getElementById('image-preview').classList.add('hidden');
+    document.getElementById('input-image').value = '';
+
     if (id) {
         const p = products.find(p => p.id === id);
         document.getElementById('input-name').value = p.name;
@@ -53,6 +59,10 @@ function openProductModal(id = null) {
         document.getElementById('input-price').value = p.price;
         document.getElementById('input-stock').value = p.stock;
         document.getElementById('input-barcode').value = p.barcode || '';
+        if (p.imageUrl) {
+            document.getElementById('image-preview').src = p.imageUrl;
+            document.getElementById('image-preview').classList.remove('hidden');
+        }
     } else {
         document.getElementById('input-name').value = '';
         document.getElementById('input-description').value = '';
@@ -68,17 +78,51 @@ function closeProductModal() {
     editingId = null;
 }
 
-async function saveProduct() {
-    const body = {
-        name: document.getElementById('input-name').value,
-        description: document.getElementById('input-description').value,
-        price: parseFloat(document.getElementById('input-price').value) || 0,
-        stock: parseInt(document.getElementById('input-stock').value) || 0,
-        barcode: document.getElementById('input-barcode').value || null
-    };
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('image-preview').src = e.target.result;
+            document.getElementById('image-preview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
 
-    if (!body.name) { alert('El nombre es obligatorio'); return; }
-    if (body.price <= 0) { alert('El precio debe ser mayor a 0'); return; }
+async function saveProduct() {
+    const name = document.getElementById('input-name').value;
+    const description = document.getElementById('input-description').value;
+    const price = parseFloat(document.getElementById('input-price').value) || 0;
+    const stock = parseInt(document.getElementById('input-stock').value) || 0;
+    const barcode = document.getElementById('input-barcode').value || null;
+    const imageFile = document.getElementById('input-image').files[0];
+
+    if (!name) { alert('El nombre es obligatorio'); return; }
+    if (price <= 0) { alert('El precio debe ser mayor a 0'); return; }
+
+    let imageUrl = null;
+
+    // si hay imagen nueva, subirla primero a Cloudinary
+    if (imageFile) {
+        const formData = new FormData();
+        formData.append('file', imageFile);
+
+        const uploadRes = await fetch(`${API}/api/upload`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+            body: formData
+        });
+
+        if (!uploadRes.ok) { alert('Error al subir la imagen'); return; }
+        const uploadData = await uploadRes.json();
+        imageUrl = uploadData.secure_url;
+    } else if (editingId) {
+        // si estamos editando y no hay imagen nueva, conservar la existente
+        const existing = products.find(p => p.id === editingId);
+        imageUrl = existing?.imageUrl || null;
+    }
+
+    const body = { name, description, price, stock, barcode, imageUrl };
 
     const url = editingId ? `${API}/api/products/${editingId}` : `${API}/api/products`;
     const method = editingId ? 'PUT' : 'POST';
