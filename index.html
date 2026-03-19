@@ -4,48 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS Tienda Escolar</title>
+    <script>if (localStorage.getItem('darkMode') === 'true') document.documentElement.classList.add('dark');</script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
 </head>
-<body class="bg-gray-100 h-screen flex">
+<body class="bg-gray-100 dark:bg-[#1a1a1a] h-screen flex transition-colors">
 
-    <!-- Modal de confirmación -->
     <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl p-6 w-80 shadow-2xl">
-            <h3 class="text-lg font-bold mb-4">Confirmar cobro</h3>
+        <div class="bg-white dark:bg-[#222] rounded-2xl p-6 w-80 shadow-2xl" style="border:1px solid #2a2a2a;">
+            <h3 class="text-lg font-bold mb-4 dark:text-gray-100">Confirmar cobro</h3>
             <div class="mb-4">
                 <div class="flex justify-between text-sm mb-2">
-                    <span class="text-gray-500">Método</span>
-                    <span id="modal-method" class="font-semibold"></span>
+                    <span class="text-gray-500 dark:text-gray-400">Método</span>
+                    <span id="modal-method" class="font-semibold dark:text-gray-100"></span>
                 </div>
                 <div id="modal-student-row" class="flex justify-between text-sm mb-2 hidden">
-                    <span class="text-gray-500">Alumno</span>
-                    <span id="modal-student" class="font-semibold"></span>
+                    <span class="text-gray-500 dark:text-gray-400">Alumno</span>
+                    <span id="modal-student" class="font-semibold dark:text-gray-100"></span>
                 </div>
                 <div id="modal-received-row" class="flex justify-between text-sm mb-2 hidden">
-                    <span class="text-gray-500">Recibido</span>
-                    <span id="modal-received" class="font-semibold"></span>
+                    <span class="text-gray-500 dark:text-gray-400">Recibido</span>
+                    <span id="modal-received" class="font-semibold dark:text-gray-100"></span>
                 </div>
                 <div id="modal-change-row" class="flex justify-between text-sm mb-2 hidden">
-                    <span class="text-gray-500">Cambio</span>
+                    <span class="text-gray-500 dark:text-gray-400">Cambio</span>
                     <span id="modal-change" class="font-semibold text-green-600"></span>
                 </div>
-                <div class="border-t pt-2 mt-2 flex justify-between font-bold text-lg">
+                <div class="border-t dark:border-gray-700 pt-2 mt-2 flex justify-between font-bold text-lg dark:text-gray-100">
                     <span>Total</span>
                     <span id="modal-total"></span>
                 </div>
             </div>
-            <button onclick="processSale(true)"
-                class="w-full py-3 bg-green-600 text-white rounded-lg font-bold mb-2 hover:bg-green-700">
-                Cobrar e imprimir ticket
-            </button>
-            <button onclick="processSale(false)"
-                class="w-full py-3 bg-green-500 text-white rounded-lg font-bold mb-2 hover:bg-green-600">
-                Cobrar sin ticket
-            </button>
-            <button onclick="closeModal()"
-                class="w-full py-2 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200">
-                Cancelar
-            </button>
+            <button onclick="processSale(true)" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold mb-2 hover:bg-green-700">Cobrar e imprimir ticket</button>
+            <button onclick="processSale(false)" class="w-full py-3 bg-green-500 text-white rounded-lg font-bold mb-2 hover:bg-green-600">Cobrar sin ticket</button>
+            <button onclick="closeModal()" class="w-full py-2 bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-200">Cancelar</button>
         </div>
     </div>
 
@@ -53,16 +45,16 @@
 
     <div class="flex flex-1 overflow-hidden ml-16">
         <div class="flex-1 flex flex-col p-4 overflow-hidden">
-            <h1 class="text-xl font-bold mb-3">Punto de Venta</h1>
+            <h1 class="text-xl font-bold mb-3 dark:text-gray-100">Punto de Venta</h1>
             <input id="search-input" type="text" placeholder="Buscar producto o escanear código..."
-                class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                class="w-full border border-gray-300 dark:border-[#333] dark:bg-[#222] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-4 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <div class="flex-1 overflow-y-auto">
-                <table class="w-full bg-white rounded-lg shadow text-sm">
-                    <thead class="bg-gray-50 sticky top-0">
+                <table class="w-full bg-white dark:bg-[#222] rounded-lg shadow text-sm" style="border:1px solid #2a2a2a;">
+                    <thead class="bg-gray-50 dark:bg-[#2a2a2a] sticky top-0">
                         <tr>
-                            <th class="text-left px-4 py-3 font-semibold text-gray-600">Producto</th>
-                            <th class="text-left px-4 py-3 font-semibold text-gray-600">Precio</th>
-                            <th class="text-left px-4 py-3 font-semibold text-gray-600">Stock</th>
+                            <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Producto</th>
+                            <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Precio</th>
+                            <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Stock</th>
                             <th class="px-4 py-3"></th>
                         </tr>
                     </thead>
@@ -73,55 +65,44 @@
             </div>
         </div>
 
-        <div class="w-80 bg-white flex flex-col shadow-lg">
-            <div class="p-4 border-b">
+        <div class="w-80 bg-white dark:bg-[#1e1e1e] flex flex-col shadow-lg" style="border-left:1px solid #2a2a2a;">
+            <div class="p-4 border-b dark:border-[#2a2a2a]">
                 <div class="flex gap-2 mb-3">
-                    <button onclick="setPaymentMethod('CASH')" id="btn-cash"
-                        class="flex-1 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold">
-                        Efectivo
-                    </button>
-                    <button onclick="setPaymentMethod('PREPAID_BALANCE')" id="btn-prepaid"
-                        class="flex-1 py-2 rounded-lg bg-gray-200 text-gray-700 text-sm font-semibold">
-                        Saldo
-                    </button>
+                    <button onclick="setPaymentMethod('CASH')" id="btn-cash" class="flex-1 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold">Efectivo</button>
+                    <button onclick="setPaymentMethod('PREPAID_BALANCE')" id="btn-prepaid" class="flex-1 py-2 rounded-lg bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-400 text-sm font-semibold">Saldo</button>
                 </div>
                 <div id="cash-section">
                     <input id="cash-input" type="number" placeholder="Monto recibido"
-                        class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        oninput="calcChange()">
+                        class="w-full border dark:border-[#333] dark:bg-[#252525] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="calcChange()">
                 </div>
                 <div id="prepaid-section" class="hidden">
                     <input id="student-search" type="text" placeholder="Buscar alumno..."
-                        class="w-full border rounded-lg px-3 py-2 mb-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        oninput="searchStudent(this.value)">
-                    <div id="student-list" class="border rounded-lg max-h-32 overflow-y-auto text-sm"></div>
-                    <div id="recent-students" class="border rounded-lg text-sm mt-2"></div>
-                    <div id="balance-warning" class="hidden text-red-500 text-xs font-semibold mb-2 p-2 bg-red-50 rounded-lg mt-2"></div>
-                    <div id="selected-student" class="hidden mt-2 p-2 bg-blue-50 rounded-lg text-sm">
-                        <span id="selected-student-name" class="font-semibold"></span>
+                        class="w-full border dark:border-[#333] dark:bg-[#252525] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 mb-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="searchStudent(this.value)">
+                    <div id="student-list" class="border dark:border-[#333] rounded-lg max-h-32 overflow-y-auto text-sm dark:bg-[#252525]"></div>
+                    <div id="recent-students" class="border dark:border-[#333] rounded-lg text-sm mt-2 dark:bg-[#252525]"></div>
+                    <div id="balance-warning" class="hidden text-red-400 text-xs font-semibold mb-2 p-2 bg-red-50 dark:bg-red-900 rounded-lg mt-2"></div>
+                    <div id="selected-student" class="hidden mt-2 p-2 bg-blue-50 dark:bg-blue-900 rounded-lg text-sm">
+                        <span id="selected-student-name" class="font-semibold dark:text-blue-100"></span>
                         <span id="selected-student-balance" class="ml-2"></span>
                     </div>
                 </div>
             </div>
-            <div class="p-4 border-b">
-                <h2 class="font-bold text-lg">Orden actual</h2>
+            <div class="p-4 border-b dark:border-[#2a2a2a]">
+                <h2 class="font-bold text-lg dark:text-gray-100">Orden actual</h2>
             </div>
             <div id="order-items" class="flex-1 overflow-y-auto p-4">
                 <p class="text-gray-400 text-sm">Sin productos</p>
             </div>
-            <div class="p-4 border-t">
-                <div class="flex justify-between font-bold text-lg mb-2">
+            <div class="p-4 border-t dark:border-[#2a2a2a]">
+                <div class="flex justify-between font-bold text-lg mb-2 dark:text-gray-100">
                     <span>Total</span>
                     <span id="order-total">$0.00</span>
                 </div>
                 <div id="change-row" class="flex justify-between text-sm mb-4">
-                    <span class="text-gray-500">Cambio</span>
+                    <span class="text-gray-500 dark:text-gray-500">Cambio</span>
                     <span id="change-display" class="font-semibold">$0.00</span>
                 </div>
-                <button onclick="openModal()"
-                    class="w-full py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700">
-                    Cobrar
-                </button>
+                <button onclick="openModal()" class="w-full py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700">Cobrar</button>
             </div>
         </div>
     </div>

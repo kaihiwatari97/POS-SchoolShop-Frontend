@@ -18,8 +18,8 @@ async function loadRecentStudents() {
     const container = document.getElementById('recent-students');
     container.innerHTML = recent.map(s => `
         <div onclick="selectStudent(${s.id}, '${s.name}', ${s.prepaidBalance})"
-            class="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b last:border-0 flex justify-between items-center">
-            <span class="font-semibold text-sm">${s.name}</span>
+            class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] cursor-pointer border-b dark:border-[#333] last:border-0 flex justify-between items-center">
+            <span class="font-semibold text-sm dark:text-gray-100">${s.name}</span>
             <span class="text-xs ${s.prepaidBalance < 20 ? 'text-orange-500' : 'text-green-600'}">$${s.prepaidBalance}</span>
         </div>
     `).join('');
@@ -31,15 +31,15 @@ function renderProducts(list) {
         tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-3 text-gray-400">Sin resultados</td></tr>';
         return;
     }
-    tbody.innerHTML = list.map(p => `
-        <tr class="border-t hover:bg-gray-50 ${p.stock === 0 ? 'opacity-50' : ''}">
+    tbody.innerHTML = list.map((p, i) => `
+        <tr class="border-t dark:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-[#262626] ${i % 2 === 0 ? 'dark:bg-[#222]' : 'dark:bg-[#1f1f1f]'} ${p.stock === 0 ? 'opacity-50' : ''}">
             <td class="px-4 py-3">
-                <div class="font-semibold">${p.name}</div>
+                <div class="font-semibold dark:text-gray-100">${p.name}</div>
                 <div class="text-gray-400 text-xs">${p.description}</div>
                 ${p.stock <= 5 ? `<div class="text-red-500 text-xs">Solo quedan ${p.stock}</div>` : ''}
             </td>
-            <td class="px-4 py-3 font-semibold">$${p.price}</td>
-            <td class="px-4 py-3 text-gray-500">${p.stock}</td>
+            <td class="px-4 py-3 font-semibold dark:text-gray-100">$${p.price}</td>
+            <td class="px-4 py-3 text-gray-500 dark:text-gray-400">${p.stock}</td>
             <td class="px-4 py-3">
                 <button onclick="addToOrder(${p.id})"
                     class="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 ${p.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
@@ -75,17 +75,17 @@ function renderOrder() {
     container.innerHTML = order.map(item => `
         <div class="flex items-center justify-between mb-3">
             <div class="flex-1">
-                <div class="text-sm font-semibold">${item.name}</div>
+                <div class="text-sm font-semibold dark:text-gray-100">${item.name}</div>
                 <div class="text-xs text-gray-400">$${item.price} c/u</div>
             </div>
             <div class="flex items-center gap-2">
                 <button onclick="changeQty(${item.productId}, -1)"
-                    class="w-6 h-6 bg-gray-200 rounded text-sm font-bold hover:bg-gray-300">-</button>
-                <span class="text-sm font-semibold w-4 text-center">${item.quantity}</span>
+                    class="w-6 h-6 bg-gray-200 dark:bg-[#2a2a2a] dark:text-gray-300 rounded text-sm font-bold hover:bg-gray-300">-</button>
+                <span class="text-sm font-semibold w-4 text-center dark:text-gray-100">${item.quantity}</span>
                 <button onclick="changeQty(${item.productId}, 1)"
-                    class="w-6 h-6 bg-gray-200 rounded text-sm font-bold hover:bg-gray-300">+</button>
+                    class="w-6 h-6 bg-gray-200 dark:bg-[#2a2a2a] dark:text-gray-300 rounded text-sm font-bold hover:bg-gray-300">+</button>
             </div>
-            <div class="ml-3 text-sm font-bold">$${(item.price * item.quantity).toFixed(2)}</div>
+            <div class="ml-3 text-sm font-bold dark:text-gray-100">$${(item.price * item.quantity).toFixed(2)}</div>
         </div>
     `).join('');
     const total = order.reduce((sum, i) => sum + i.price * i.quantity, 0);
@@ -124,8 +124,8 @@ function setPaymentMethod(method) {
     document.getElementById('cash-section').classList.toggle('hidden', method !== 'CASH');
     document.getElementById('prepaid-section').classList.toggle('hidden', method !== 'PREPAID_BALANCE');
     document.getElementById('change-row').classList.toggle('hidden', method !== 'CASH');
-    document.getElementById('btn-cash').className = `flex-1 py-2 rounded-lg text-sm font-semibold ${method === 'CASH' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`;
-    document.getElementById('btn-prepaid').className = `flex-1 py-2 rounded-lg text-sm font-semibold ${method === 'PREPAID_BALANCE' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`;
+    document.getElementById('btn-cash').className = `flex-1 py-2 rounded-lg text-sm font-semibold ${method === 'CASH' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-400'}`;
+    document.getElementById('btn-prepaid').className = `flex-1 py-2 rounded-lg text-sm font-semibold ${method === 'PREPAID_BALANCE' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-400'}`;
     checkBalance();
 }
 
@@ -148,8 +148,8 @@ async function searchStudent(query) {
     const list = document.getElementById('student-list');
     list.innerHTML = filtered.map(s => `
         <div onclick="selectStudent(${s.id}, '${s.name}', ${s.prepaidBalance})"
-            class="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b last:border-0">
-            <span class="font-semibold">${s.name}</span>
+            class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] cursor-pointer border-b dark:border-[#333] last:border-0">
+            <span class="font-semibold dark:text-gray-100">${s.name}</span>
             <span class="ml-2 ${s.prepaidBalance < 20 ? 'text-orange-500' : 'text-green-600'}">$${s.prepaidBalance}</span>
         </div>
     `).join('');
@@ -253,10 +253,7 @@ document.getElementById('search-input').addEventListener('keydown', function(e) 
 });
 
 document.getElementById('search-input').addEventListener('input', function() {
-    if (this.value === '') {
-        renderProducts(products);
-        return;
-    }
+    if (this.value === '') { renderProducts(products); return; }
     const q = this.value.toLowerCase();
     renderProducts(products.filter(p => p.name.toLowerCase().includes(q)));
 });

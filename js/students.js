@@ -16,12 +16,12 @@ function renderStudents(list) {
         tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-3 text-gray-400">Sin alumnos</td></tr>';
         return;
     }
-    tbody.innerHTML = list.map(s => `
-        <tr class="border-t hover:bg-gray-50">
-            <td class="px-4 py-3 font-semibold">${s.name}</td>
-            <td class="px-4 py-3 text-gray-500 capitalize">${s.level || '—'}</td>
-            <td class="px-4 py-3 text-gray-500">${s.grade || '—'}</td>
-            <td class="px-4 py-3 text-gray-500">${s.group || '—'}</td>
+    tbody.innerHTML = list.map((s, i) => `
+        <tr class="border-t dark:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-[#262626] ${i % 2 === 0 ? 'dark:bg-[#222]' : 'dark:bg-[#1f1f1f]'}">
+            <td class="px-4 py-3 font-semibold dark:text-gray-100">${s.name}</td>
+            <td class="px-4 py-3 text-gray-500 dark:text-gray-400 capitalize">${s.level || '—'}</td>
+            <td class="px-4 py-3 text-gray-500 dark:text-gray-400">${s.grade ? s.grade + '°' : '—'}</td>
+            <td class="px-4 py-3 text-gray-500 dark:text-gray-400">${s.group || '—'}</td>
             <td class="px-4 py-3">
                 <span class="font-semibold ${s.prepaidBalance < 20 ? 'text-orange-500' : 'text-green-600'}">
                     $${s.prepaidBalance}
@@ -80,24 +80,11 @@ async function saveStudent() {
         group: document.getElementById('input-group').value,
         prepaidBalance: parseFloat(document.getElementById('input-balance').value) || 0
     };
-
     if (!body.name) { alert('El nombre es obligatorio'); return; }
-
     const url = editingId ? `${API}/api/students/${editingId}` : `${API}/api/students`;
     const method = editingId ? 'PUT' : 'POST';
-
-    const res = await fetch(url, {
-        method,
-        headers: authHeaders(),
-        body: JSON.stringify(body)
-    });
-
-    if (res.ok) {
-        closeStudentModal();
-        loadStudents();
-    } else {
-        alert('Error al guardar alumno');
-    }
+    const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
+    if (res.ok) { closeStudentModal(); loadStudents(); } else { alert('Error al guardar alumno'); }
 }
 
 function openBalanceModal(id, name, currentBalance) {
@@ -116,41 +103,16 @@ function closeBalanceModal() {
 async function addBalance() {
     const amount = parseFloat(document.getElementById('input-add-balance').value);
     if (!amount || amount <= 0) { alert('Ingresa un monto válido'); return; }
-
     const student = students.find(s => s.id === balanceStudentId);
-    const body = {
-        name: student.name,
-        grade: student.grade,
-        level: student.level,
-        group: student.group,
-        prepaidBalance: student.prepaidBalance + amount
-    };
-
-    const res = await fetch(`${API}/api/students/${balanceStudentId}`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify(body)
-    });
-
-    if (res.ok) {
-        closeBalanceModal();
-        loadStudents();
-    } else {
-        alert('Error al cargar saldo');
-    }
+    const body = { name: student.name, grade: student.grade, level: student.level, group: student.group, prepaidBalance: student.prepaidBalance + amount };
+    const res = await fetch(`${API}/api/students/${balanceStudentId}`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify(body) });
+    if (res.ok) { closeBalanceModal(); loadStudents(); } else { alert('Error al cargar saldo'); }
 }
 
 async function deleteStudent(id) {
     if (!confirm('¿Eliminar este alumno?')) return;
-    const res = await fetch(`${API}/api/students/${id}`, {
-        method: 'DELETE',
-        headers: authHeaders()
-    });
-    if (res.ok) {
-        loadStudents();
-    } else {
-        alert('Error al eliminar alumno');
-    }
+    const res = await fetch(`${API}/api/students/${id}`, { method: 'DELETE', headers: authHeaders() });
+    if (res.ok) { loadStudents(); } else { alert('Error al eliminar alumno'); }
 }
 
 document.getElementById('search-input').addEventListener('input', function() {

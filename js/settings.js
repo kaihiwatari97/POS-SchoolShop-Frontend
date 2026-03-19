@@ -1,79 +1,19 @@
-requireAuth();
+requireAdmin();
 
-async function loadUsers() {
-    const res = await fetch(`${API}/api/auth/users`, { headers: authHeaders() });
-    const users = await res.json();
-    const tbody = document.getElementById('users-table');
-    const currentUsername = getUsername();
-
-    tbody.innerHTML = users.map(u => `
-        <tr class="border-t hover:bg-gray-50">
-            <td class="px-4 py-3 font-semibold">${u.username}</td>
-            <td class="px-4 py-3">
-                <span class="px-2 py-1 rounded text-xs font-semibold ${u.role === 'ADMIN' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}">
-                    ${u.role === 'ADMIN' ? 'Administrador' : 'Empleado'}
-                </span>
-            </td>
-            <td class="px-4 py-3">
-                <div class="flex justify-end">
-                    ${u.username !== currentUsername ? `
-                    <button onclick="deleteUser(${u.id})"
-                        class="px-3 py-1 bg-red-500 text-white rounded text-xs font-semibold hover:bg-red-600">
-                        Eliminar
-                    </button>` : '<span class="text-xs text-gray-400">Tú</span>'}
-                </div>
-            </td>
-        </tr>
-    `).join('');
-
-    document.getElementById('current-user').textContent = getUsername();
-    document.getElementById('current-role').textContent = getRole() === 'ADMIN' ? 'Administrador' : 'Empleado';
+function updateToggle() {
+    const isDark = document.documentElement.classList.contains('dark');
+    const btn = document.getElementById('dark-toggle');
+    btn.className = `relative w-12 h-6 rounded-full transition-colors focus:outline-none ${isDark ? 'bg-blue-600' : 'bg-gray-300'}`;
+    btn.innerHTML = `<span class="absolute top-0.5 ${isDark ? 'left-6' : 'left-0.5'} w-5 h-5 bg-white rounded-full shadow transition-all"></span>`;
 }
 
-function openUserModal() {
-    document.getElementById('input-username').value = '';
-    document.getElementById('input-password').value = '';
-    document.getElementById('input-role').value = 'EMPLOYEE';
-    document.getElementById('user-modal').classList.remove('hidden');
+function toggleDarkMode() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('darkMode', isDark);
+    updateToggle();
 }
 
-function closeUserModal() {
-    document.getElementById('user-modal').classList.add('hidden');
-}
+document.getElementById('current-user').textContent = getUsername();
+document.getElementById('current-role').textContent = getRole() === 'ADMIN' ? 'Administrador' : 'Empleado';
 
-async function saveUser() {
-    const username = document.getElementById('input-username').value;
-    const password = document.getElementById('input-password').value;
-    const role = document.getElementById('input-role').value;
-
-    if (!username || !password) { alert('Usuario y contraseña son obligatorios'); return; }
-
-    const res = await fetch(`${API}/api/auth/users`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ username, password, role })
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-        closeUserModal();
-        loadUsers();
-    } else {
-        alert(data.error || 'Error al crear usuario');
-    }
-}
-
-async function deleteUser(id) {
-    if (!confirm('¿Eliminar este usuario?')) return;
-    const res = await fetch(`${API}/api/auth/users/${id}`, {
-        method: 'DELETE',
-        headers: authHeaders()
-    });
-    if (res.ok) {
-        loadUsers();
-    } else {
-        alert('Error al eliminar usuario');
-    }
-}
-
-loadUsers();
+updateToggle();
