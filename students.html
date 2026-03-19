@@ -24,10 +24,15 @@
                     <option value="preparatoria">Preparatoria</option>
                 </select>
                 <div class="flex gap-2 min-w-0">
-                    <input id="input-grade" type="text" placeholder="Grado (ej: 3)"
-                        class="min-w-0 flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input id="input-group" type="text" placeholder="Grupo (ej: A)"
-                        class="min-w-0 flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="flex items-center min-w-0 flex-1 border rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+                        <input id="input-grade" type="number" min="1" max="12" placeholder="Grado"
+                            class="min-w-0 flex-1 px-3 py-2 text-sm focus:outline-none">
+                        <span class="pr-3 text-gray-400 text-sm select-none">°</span>
+                    </div>
+                    <input id="input-group" type="text" placeholder="Grupo"
+                        class="min-w-0 flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        oninput="this.value = this.value.toUpperCase()"
+                        maxlength="2">
                 </div>
                 <input id="input-balance" type="number" placeholder="Saldo inicial"
                     class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -103,6 +108,7 @@
     </div>
 
     <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/sidebar.js"></script>
     <script src="js/students.js"></script>
 </body>

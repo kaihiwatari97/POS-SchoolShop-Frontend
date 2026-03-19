@@ -1,16 +1,18 @@
+requireAuth();
+
 let products = [];
 let order = [];
 let paymentMethod = 'CASH';
 let selectedStudent = null;
 
 async function loadProducts() {
-    const res = await fetch(`${API}/api/products`);
+    const res = await fetch(`${API}/api/products`, { headers: authHeaders() });
     products = await res.json();
     renderProducts(products);
 }
 
 async function loadRecentStudents() {
-    const res = await fetch(`${API}/api/students`);
+    const res = await fetch(`${API}/api/students`, { headers: authHeaders() });
     const students = await res.json();
     const recent = students.slice(0, 4);
     const container = document.getElementById('recent-students');
@@ -140,7 +142,7 @@ async function searchStudent(query) {
         document.getElementById('student-list').innerHTML = '';
         return;
     }
-    const res = await fetch(`${API}/api/students`);
+    const res = await fetch(`${API}/api/students`, { headers: authHeaders() });
     const students = await res.json();
     const filtered = students.filter(s => s.name.toLowerCase().includes(query.toLowerCase()));
     const list = document.getElementById('student-list');
@@ -209,7 +211,7 @@ async function processSale(printTicket) {
     try {
         const res = await fetch(`${API}/api/sales`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders(),
             body: JSON.stringify(body)
         });
         const data = await res.json();
@@ -230,10 +232,35 @@ async function processSale(printTicket) {
     }
 }
 
+document.getElementById('search-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        const barcode = this.value.trim();
+        if (!barcode) return;
+        const product = products.find(p => p.barcode === barcode);
+        if (product) {
+            if (product.stock > 0) {
+                addToOrder(product.id);
+                this.value = '';
+            } else {
+                alert(`Sin stock: ${product.name}`);
+                this.value = '';
+            }
+        } else {
+            alert(`Código no encontrado: ${barcode}`);
+            this.value = '';
+        }
+    }
+});
+
 document.getElementById('search-input').addEventListener('input', function() {
+    if (this.value === '') {
+        renderProducts(products);
+        return;
+    }
     const q = this.value.toLowerCase();
     renderProducts(products.filter(p => p.name.toLowerCase().includes(q)));
 });
 
 loadProducts();
 loadRecentStudents();
+document.getElementById('search-input').focus();

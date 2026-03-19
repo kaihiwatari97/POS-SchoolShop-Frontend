@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes — POS Tienda Escolar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            #sidebar, .no-print { display: none !important; }
+            body { background: white; }
+            .ml-16 { margin-left: 0 !important; }
+            #print-header { display: block !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex">
+
+    <!-- Sidebar -->
+    <div id="sidebar"></div>
+
+    <!-- Contenido -->
+    <div class="flex-1 flex flex-col p-6 ml-16 overflow-hidden">
+
+        <!-- Header solo visible al imprimir -->
+        <div id="print-header" class="hidden mb-6">
+            <h1 id="print-title" class="text-3xl font-bold mb-1"></h1>
+            <p id="print-period" class="text-base text-gray-500 capitalize"></p>
+        </div>
+
+        <div class="flex justify-between items-center mb-4 no-print">
+            <h1 class="text-xl font-bold">Reportes</h1>
+            <div class="flex gap-2">
+                <button onclick="setFilter('day')" id="btn-day"
+                    class="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white">
+                    Hoy
+                </button>
+                <button onclick="setFilter('week')" id="btn-week"
+                    class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-200 text-gray-700">
+                    Semana
+                </button>
+                <button onclick="setFilter('month')" id="btn-month"
+                    class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-200 text-gray-700">
+                    Mes
+                </button>
+                <button onclick="setFilter('year')" id="btn-year"
+                    class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-200 text-gray-700">
+                    Año
+                </button>
+                <button onclick="setFilter('all')" id="btn-all"
+                    class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-200 text-gray-700">
+                    Todo
+                </button>
+                <button onclick="printReport()"
+                    class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-800 text-white hover:bg-gray-900">
+                    🖨️ Imprimir
+                </button>
+                <button onclick="printTicket()"
+                    class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-400 text-white cursor-not-allowed" title="Requiere impresora térmica">
+                    🧾 Ticket
+                </button>
+            </div>
+        </div>
+
+        <!-- Métricas -->
+        <div class="grid grid-cols-3 gap-4 mb-4">
+            <div class="bg-white rounded-lg p-4 shadow">
+                <div class="text-sm text-gray-500 mb-1">Ventas totales</div>
+                <div id="metric-total" class="text-2xl font-bold text-green-600">$0.00</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 shadow">
+                <div class="text-sm text-gray-500 mb-1">Transacciones</div>
+                <div id="metric-count" class="text-2xl font-bold">0</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 shadow">
+                <div class="text-sm text-gray-500 mb-1">Ticket promedio</div>
+                <div id="metric-avg" class="text-2xl font-bold">$0.00</div>
+            </div>
+        </div>
+
+        <!-- Tabla de ventas -->
+        <div class="flex-1 overflow-y-auto">
+            <table class="w-full bg-white rounded-lg shadow text-sm">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="text-left px-4 py-3 font-semibold text-gray-600">Fecha</th>
+                        <th class="text-left px-4 py-3 font-semibold text-gray-600">Alumno</th>
+                        <th class="text-left px-4 py-3 font-semibold text-gray-600">Productos</th>
+                        <th class="text-left px-4 py-3 font-semibold text-gray-600">Método</th>
+                        <th class="text-left px-4 py-3 font-semibold text-gray-600">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="sales-table">
+                    <tr><td colspan="5" class="px-4 py-3 text-gray-400">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/reports.js"></script>
+    
+</body>
+</html>

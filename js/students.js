@@ -1,9 +1,11 @@
+requireAuth();
+
 let students = [];
 let editingId = null;
 let balanceStudentId = null;
 
 async function loadStudents() {
-    const res = await fetch(`${API}/api/students`);
+    const res = await fetch(`${API}/api/students`, { headers: authHeaders() });
     students = await res.json();
     renderStudents(students);
 }
@@ -86,7 +88,7 @@ async function saveStudent() {
 
     const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify(body)
     });
 
@@ -126,7 +128,7 @@ async function addBalance() {
 
     const res = await fetch(`${API}/api/students/${balanceStudentId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify(body)
     });
 
@@ -140,7 +142,10 @@ async function addBalance() {
 
 async function deleteStudent(id) {
     if (!confirm('¿Eliminar este alumno?')) return;
-    const res = await fetch(`${API}/api/students/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API}/api/students/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+    });
     if (res.ok) {
         loadStudents();
     } else {

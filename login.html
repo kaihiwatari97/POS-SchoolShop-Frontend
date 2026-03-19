@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — POS Tienda Escolar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+
+    <div class="bg-white rounded-2xl shadow-lg p-8 w-80">
+        <h1 class="text-2xl font-bold mb-1">POS Tienda Escolar</h1>
+        <p class="text-sm text-gray-400 mb-6">Inicia sesión para continuar</p>
+
+        <div id="error-msg" class="hidden mb-4 p-3 bg-red-50 text-red-500 text-sm rounded-lg"></div>
+
+        <div class="flex flex-col gap-3">
+            <input id="input-username" type="text" placeholder="Usuario"
+                class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input id="input-password" type="password" placeholder="Contraseña"
+                class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button onclick="login()"
+                class="py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+                Entrar
+            </button>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // si ya hay sesión activa, redirige directo al POS
+        if (getToken()) {
+            window.location.href = 'index.html';
+        }
+
+        async function login() {
+            const username = document.getElementById('input-username').value;
+            const password = document.getElementById('input-password').value;
+
+            if (!username || !password) {
+                showError('Ingresa usuario y contraseña');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showError('Usuario o contraseña incorrectos');
+                    return;
+                }
+
+                saveSession(data.token, data.role, data.username);
+                window.location.href = 'index.html';
+
+            } catch (e) {
+                showError('Error de conexión con la API');
+            }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('error-msg');
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
+
+        // permite hacer login con Enter
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Enter') login();
+        });
+    </script>
+
+</body>
+</html>
