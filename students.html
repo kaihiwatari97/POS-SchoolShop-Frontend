@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumnos — POS Tienda Escolar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 h-screen flex">
+
+    <!-- Modal agregar/editar alumno -->
+    <div id="student-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 w-96 shadow-2xl overflow-hidden">
+            <h3 id="modal-title" class="text-lg font-bold mb-4">Agregar alumno</h3>
+            <div class="flex flex-col gap-3">
+                <input id="input-name" type="text" placeholder="Nombre completo"
+                    class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="input-level"
+                    class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Nivel</option>
+                    <option value="kinder">Kinder</option>
+                    <option value="primaria">Primaria</option>
+                    <option value="secundaria">Secundaria</option>
+                    <option value="preparatoria">Preparatoria</option>
+                </select>
+                <div class="flex gap-2 min-w-0">
+                    <input id="input-grade" type="text" placeholder="Grado (ej: 3)"
+                        class="min-w-0 flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input id="input-group" type="text" placeholder="Grupo (ej: A)"
+                        class="min-w-0 flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <input id="input-balance" type="number" placeholder="Saldo inicial"
+                    class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex gap-2 mt-4">
+                <button onclick="saveStudent()"
+                    class="flex-1 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+                    Guardar
+                </button>
+                <button onclick="closeStudentModal()"
+                    class="flex-1 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal cargar saldo -->
+    <div id="balance-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 w-80 shadow-2xl">
+            <h3 class="text-lg font-bold mb-1">Cargar saldo</h3>
+            <p id="balance-modal-name" class="text-sm text-gray-500 mb-4"></p>
+            <div class="flex justify-between text-sm mb-3">
+                <span class="text-gray-500">Saldo actual</span>
+                <span id="balance-modal-current" class="font-semibold"></span>
+            </div>
+            <input id="input-add-balance" type="number" placeholder="Monto a agregar"
+                class="w-full border rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="flex gap-2">
+                <button onclick="addBalance()"
+                    class="flex-1 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700">
+                    Cargar
+                </button>
+                <button onclick="closeBalanceModal()"
+                    class="flex-1 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div id="sidebar"></div>
+
+    <!-- Contenido -->
+    <div class="flex-1 flex flex-col p-6 ml-16 overflow-hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-xl font-bold">Alumnos</h1>
+            <button onclick="openStudentModal()"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">
+                + Agregar alumno
+            </button>
+        </div>
+        <input id="search-input" type="text" placeholder="Buscar alumno..."
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="flex-1 overflow-y-auto">
+            <table class="w-full bg-white rounded-lg shadow text-sm">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="text-left px-4 py-3 font-semibold text-gray-600">Nombre</th>
+                        <th class="text-left px-4 py-3 font-semibold text-gray-600">Nivel</th>
+                        <th class="text-left px-4 py-3 font-semibold text-gray-600">Grado</th>
+                        <th class="text-left px-4 py-3 font-semibold text-gray-600">Grupo</th>
+                        <th class="text-left px-4 py-3 font-semibold text-gray-600">Saldo</th>
+                        <th class="px-4 py-3"></th>
+                    </tr>
+                </thead>
+                <tbody id="students-table">
+                    <tr><td colspan="6" class="px-4 py-3 text-gray-400">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/students.js"></script>
+</body>
+</html>
