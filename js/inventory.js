@@ -1,4 +1,4 @@
-requireAuth();
+requireAdmin();
 
 let products = [];
 let editingId = null;

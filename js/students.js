@@ -1,4 +1,4 @@
-requireAuth();
+requireAdmin();
 
 let students = [];
 let editingId = null;
