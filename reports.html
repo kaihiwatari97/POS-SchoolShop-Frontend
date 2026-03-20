@@ -11,7 +11,7 @@
         @media print {
             #sidebar, .no-print { display: none !important; }
             body { background: white; }
-            .ml-16 { margin-left: 0 !important; }
+            .ml-20 { margin-left: 0 !important; }
             #print-header { display: block !important; }
         }
     </style>
@@ -20,7 +20,7 @@
 
     <div id="sidebar"></div>
 
-    <div class="flex-1 flex flex-col p-6 ml-16 overflow-hidden">
+    <div class="flex-1 flex flex-col p-6 ml-20 overflow-hidden">
         <div id="print-header" class="hidden mb-6">
             <h1 id="print-title" class="text-3xl font-bold mb-1"></h1>
             <p id="print-period" class="text-base text-gray-500 capitalize"></p>
@@ -62,11 +62,12 @@
                         <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Alumno</th>
                         <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Productos</th>
                         <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Método</th>
+                        <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Usuario</th>
                         <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Total</th>
                     </tr>
                 </thead>
                 <tbody id="sales-table">
-                    <tr><td colspan="5" class="px-4 py-3 text-gray-400">Cargando...</td></tr>
+                    <tr><td colspan="6" class="px-4 py-3 text-gray-400">Cargando...</td></tr>
                 </tbody>
             </table>
         </div>

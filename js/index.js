@@ -4,6 +4,8 @@ let products = [];
 let order = [];
 let paymentMethod = 'CASH';
 let selectedStudent = null;
+let currentView = localStorage.getItem('posView') || 'list';
+let currentSort = localStorage.getItem('posSort') || 'name';
 
 async function loadProducts() {
     const res = await fetch(`${API}/api/products`, { headers: authHeaders() });
@@ -25,30 +27,140 @@ async function loadRecentStudents() {
     `).join('');
 }
 
+function toggleDropdown(id) {
+    const dropdowns = ['sort-dropdown', 'view-dropdown'];
+    dropdowns.forEach(d => {
+        const el = document.getElementById(d);
+        if (d === id) {
+            el.classList.toggle('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
+    });
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.relative')) {
+        document.getElementById('sort-dropdown')?.classList.add('hidden');
+        document.getElementById('view-dropdown')?.classList.add('hidden');
+    }
+});
+
+function setSortAndClose(sort, label) {
+    currentSort = sort;
+    localStorage.setItem('posSort', sort);
+    document.getElementById('sort-label').textContent = label;
+    document.getElementById('sort-dropdown').classList.add('hidden');
+    renderProducts(getFilteredProducts());
+}
+
+function setViewAndClose(view) {
+    currentView = view;
+    localStorage.setItem('posView', view);
+    document.getElementById('view-label').textContent = view === 'list' ? 'Lista' : 'Grid';
+    document.getElementById('view-dropdown').classList.add('hidden');
+    renderProducts(getFilteredProducts());
+}
+
+function setView(view) {
+    currentView = view;
+    localStorage.setItem('posView', view);
+    const label = document.getElementById('view-label');
+    if (label) label.textContent = view === 'list' ? 'Lista' : 'Grid';
+    renderProducts(getFilteredProducts());
+}
+
+function getFilteredProducts() {
+    const q = document.getElementById('search-input')?.value.toLowerCase() || '';
+    let list = q ? products.filter(p =>
+        p.name.toLowerCase().includes(q) || (p.barcode && p.barcode.includes(q))
+    ) : [...products];
+
+    switch (currentSort) {
+        case 'name':      list.sort((a, b) => a.name.localeCompare(b.name)); break;
+        case 'name-desc': list.sort((a, b) => b.name.localeCompare(a.name)); break;
+        case 'price-asc': list.sort((a, b) => a.price - b.price); break;
+        case 'price-desc':list.sort((a, b) => b.price - a.price); break;
+        case 'stock-asc': list.sort((a, b) => a.stock - b.stock); break;
+        case 'stock-desc':list.sort((a, b) => b.stock - a.stock); break;
+    }
+    return list;
+}
+
 function renderProducts(list) {
-    const tbody = document.getElementById('products-table');
+    const container = document.getElementById('products-container');
+    if (!container) return;
+    if (currentView === 'grid') {
+        renderGrid(list, container);
+    } else {
+        renderList(list, container);
+    }
+}
+
+function renderList(list, container) {
+    container.innerHTML = `
+        <table class="w-full bg-white dark:bg-[#222] rounded-lg shadow text-sm" style="border:1px solid #2a2a2a;">
+            <thead class="bg-gray-50 dark:bg-[#2a2a2a] sticky top-0">
+                <tr>
+                    <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Producto</th>
+                    <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Precio</th>
+                    <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Stock</th>
+                    <th class="px-4 py-3"></th>
+                </tr>
+            </thead>
+            <tbody id="products-table">
+                ${list.length === 0 ? '<tr><td colspan="4" class="px-4 py-3 text-gray-400">Sin resultados</td></tr>' :
+                list.map((p, i) => `
+                    <tr class="border-t dark:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-[#262626] ${i % 2 === 0 ? 'dark:bg-[#222]' : 'dark:bg-[#1f1f1f]'} ${p.stock === 0 ? 'opacity-50' : ''}">
+                        <td class="px-4 py-3">
+                            <div class="font-semibold dark:text-gray-100">${p.name}</div>
+                            <div class="text-gray-400 text-xs">${p.description || ''}</div>
+                            ${p.stock <= 5 && p.stock > 0 ? `<div class="text-orange-500 text-xs">Solo quedan ${p.stock}</div>` : ''}
+                        </td>
+                        <td class="px-4 py-3 font-semibold dark:text-gray-100">$${p.price}</td>
+                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">${p.stock}</td>
+                        <td class="px-4 py-3">
+                            <button onclick="addToOrder(${p.id})"
+                                class="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 ${p.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
+                                ${p.stock === 0 ? 'disabled' : ''}>
+                                Agregar
+                            </button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function renderGrid(list, container) {
     if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-3 text-gray-400">Sin resultados</td></tr>';
+        container.innerHTML = '<p class="text-gray-400 text-sm">Sin resultados</p>';
         return;
     }
-    tbody.innerHTML = list.map((p, i) => `
-        <tr class="border-t dark:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-[#262626] ${i % 2 === 0 ? 'dark:bg-[#222]' : 'dark:bg-[#1f1f1f]'} ${p.stock === 0 ? 'opacity-50' : ''}">
-            <td class="px-4 py-3">
-                <div class="font-semibold dark:text-gray-100">${p.name}</div>
-                <div class="text-gray-400 text-xs">${p.description}</div>
-                ${p.stock <= 5 ? `<div class="text-red-500 text-xs">Solo quedan ${p.stock}</div>` : ''}
-            </td>
-            <td class="px-4 py-3 font-semibold dark:text-gray-100">$${p.price}</td>
-            <td class="px-4 py-3 text-gray-500 dark:text-gray-400">${p.stock}</td>
-            <td class="px-4 py-3">
-                <button onclick="addToOrder(${p.id})"
-                    class="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 ${p.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
-                    ${p.stock === 0 ? 'disabled' : ''}>
-                    Agregar
-                </button>
-            </td>
-        </tr>
-    `).join('');
+    container.innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;">
+            ${list.map(p => `
+                <div class="bg-white dark:bg-[#222] rounded-xl shadow flex flex-col overflow-hidden ${p.stock === 0 ? 'opacity-50' : ''}" style="border:1px solid #2a2a2a;">
+                    <div class="w-full h-32 bg-gray-100 dark:bg-[#2a2a2a] flex items-center justify-center overflow-hidden">
+                        ${p.imageUrl ? `<img src="${p.imageUrl}" class="w-full h-full object-cover">` : `<span style="font-size:36px;">🛍️</span>`}
+                    </div>
+                    <div class="p-3 flex flex-col flex-1">
+                        <div class="font-semibold text-sm dark:text-gray-100 mb-1 leading-tight">${p.name}</div>
+                        <div class="text-green-600 font-bold text-sm mb-1">$${p.price}</div>
+                        <div class="text-xs text-gray-400 mb-2">
+                            ${p.stock === 0 ? '<span class="text-red-500">Sin stock</span>' : p.stock <= 5 ? `<span class="text-orange-500">Stock: ${p.stock}</span>` : `Stock: ${p.stock}`}
+                        </div>
+                        <button onclick="addToOrder(${p.id})"
+                            class="mt-auto w-full py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 ${p.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
+                            ${p.stock === 0 ? 'disabled' : ''}>
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
 }
 
 function addToOrder(productId) {
@@ -63,6 +175,16 @@ function addToOrder(productId) {
     renderOrder();
 }
 
+function updateStudentBalance() {
+    if (!selectedStudent) return;
+    const total = order.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    const remaining = selectedStudent.balance - total;
+    const el = document.getElementById('student-remaining');
+    if (!el) return;
+    el.textContent = `Saldo restante: $${remaining.toFixed(2)}`;
+    el.className = `text-xs mt-1 ${remaining < 0 ? 'text-red-500' : 'text-green-600'}`;
+}
+
 function renderOrder() {
     const container = document.getElementById('order-items');
     if (order.length === 0) {
@@ -70,6 +192,7 @@ function renderOrder() {
         document.getElementById('order-total').textContent = '$0.00';
         document.getElementById('change-display').textContent = '$0.00';
         checkBalance();
+        updateStudentBalance();
         return;
     }
     container.innerHTML = order.map(item => `
@@ -92,6 +215,7 @@ function renderOrder() {
     document.getElementById('order-total').textContent = `$${total.toFixed(2)}`;
     calcChange();
     checkBalance();
+    updateStudentBalance();
 }
 
 function changeQty(productId, delta) {
@@ -164,6 +288,7 @@ function selectStudent(id, name, balance) {
     document.getElementById('selected-student-name').textContent = name;
     document.getElementById('selected-student-balance').textContent = `Saldo: $${balance}`;
     document.getElementById('selected-student-balance').className = `ml-2 ${balance < 20 ? 'text-orange-500' : 'text-green-600'}`;
+    updateStudentBalance();
     checkBalance();
 }
 
@@ -218,18 +343,65 @@ async function processSale(printTicket) {
         if (!res.ok) { closeModal(); alert(data.error); return; }
 
         closeModal();
-        alert(`Venta registrada. Total: $${data.total}`);
-        order = [];
-        selectedStudent = null;
-        document.getElementById('cash-input').value = '';
-        document.getElementById('selected-student').classList.add('hidden');
-        renderOrder();
-        loadProducts();
-        loadRecentStudents();
+
+        if (printTicket) {
+            await fetch(`${API}/api/terminal/ticket/${data.id}`, {
+                method: 'POST',
+                headers: authHeaders()
+            });
+        }
+
+        if (paymentMethod === 'CASH') {
+            await fetch(`${API}/api/terminal/drawer/open`, {
+                method: 'POST',
+                headers: authHeaders()
+            });
+            showDrawerModal();
+            await waitForDrawerClose();
+            hideDrawerModal();
+        }
+
+        finalizeSale();
     } catch (e) {
         closeModal();
         alert('Error al procesar la venta');
     }
+}
+
+function showDrawerModal() {
+    document.getElementById('drawer-modal').classList.remove('hidden');
+}
+
+function hideDrawerModal() {
+    document.getElementById('drawer-modal').classList.add('hidden');
+}
+
+function waitForDrawerClose() {
+    return new Promise(resolve => {
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`${API}/api/terminal/drawer/status`, { headers: authHeaders() });
+                const data = await res.json();
+                if (data.status === 'closed') {
+                    clearInterval(interval);
+                    resolve();
+                }
+            } catch (e) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 1000);
+    });
+}
+
+function finalizeSale() {
+    order = [];
+    selectedStudent = null;
+    document.getElementById('cash-input').value = '';
+    document.getElementById('selected-student').classList.add('hidden');
+    renderOrder();
+    loadProducts();
+    loadRecentStudents();
 }
 
 document.getElementById('search-input').addEventListener('keydown', function(e) {
@@ -238,13 +410,8 @@ document.getElementById('search-input').addEventListener('keydown', function(e) 
         if (!barcode) return;
         const product = products.find(p => p.barcode === barcode);
         if (product) {
-            if (product.stock > 0) {
-                addToOrder(product.id);
-                this.value = '';
-            } else {
-                alert(`Sin stock: ${product.name}`);
-                this.value = '';
-            }
+            if (product.stock > 0) { addToOrder(product.id); this.value = ''; }
+            else { alert(`Sin stock: ${product.name}`); this.value = ''; }
         } else {
             alert(`Código no encontrado: ${barcode}`);
             this.value = '';
@@ -253,10 +420,19 @@ document.getElementById('search-input').addEventListener('keydown', function(e) 
 });
 
 document.getElementById('search-input').addEventListener('input', function() {
-    if (this.value === '') { renderProducts(products); return; }
-    const q = this.value.toLowerCase();
-    renderProducts(products.filter(p => p.name.toLowerCase().includes(q)));
+    renderProducts(getFilteredProducts());
 });
+
+// inicializar labels guardados
+const sortLabels = {
+    'name': 'Nombre', 'name-desc': 'Nombre Z-A',
+    'price-asc': 'Precio ↑', 'price-desc': 'Precio ↓',
+    'stock-asc': 'Stock ↑', 'stock-desc': 'Stock ↓'
+};
+const sortLabel = document.getElementById('sort-label');
+const viewLabel = document.getElementById('view-label');
+if (sortLabel) sortLabel.textContent = sortLabels[currentSort] || 'Nombre';
+if (viewLabel) viewLabel.textContent = currentView === 'list' ? 'Lista' : 'Grid';
 
 loadProducts();
 loadRecentStudents();

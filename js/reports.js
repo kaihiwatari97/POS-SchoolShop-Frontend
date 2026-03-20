@@ -70,7 +70,7 @@ function renderSales() {
     document.getElementById('metric-avg').textContent = `$${avg.toFixed(2)}`;
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-3 text-gray-400">Sin ventas en este periodo</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-3 text-gray-400">Sin ventas en este periodo</td></tr>';
         return;
     }
 
@@ -93,6 +93,7 @@ function renderSales() {
                         ${method}
                     </span>
                 </td>
+                <td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">${sale.staffUsername || '—'}</td>
                 <td class="px-4 py-3 font-bold dark:text-gray-100">$${sale.total.toFixed(2)}</td>
             </tr>
         `;

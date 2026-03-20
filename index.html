@@ -41,28 +41,57 @@
         </div>
     </div>
 
+    <div id="drawer-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-[#222] rounded-2xl p-8 w-80 shadow-2xl text-center" style="border:1px solid #2a2a2a;">
+            <div style="font-size:48px;" class="mb-4">🪙</div>
+            <h3 class="text-lg font-bold mb-2 dark:text-gray-100">Cajón abierto</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Cierra el cajón para terminar la venta</p>
+            <div class="mt-4 flex items-center justify-center gap-2">
+                <div class="w-2 h-2 bg-orange-500 rounded-full animate-ping"></div>
+                <span class="text-xs text-orange-500 font-semibold">Esperando...</span>
+            </div>
+        </div>
+    </div>
+
     <div id="sidebar"></div>
 
-    <div class="flex flex-1 overflow-hidden ml-16">
+    <div class="flex flex-1 overflow-hidden ml-20">
         <div class="flex-1 flex flex-col p-4 overflow-hidden">
-            <h1 class="text-xl font-bold mb-3 dark:text-gray-100">Punto de Venta</h1>
+            <div class="flex justify-between items-center mb-3">
+                <h1 class="text-xl font-bold dark:text-gray-100">Punto de Venta</h1>
+                <div class="flex gap-2">
+
+                    <div class="relative">
+                        <button onclick="toggleDropdown('sort-dropdown')"
+                            class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                            Ordenar: <span id="sort-label">Nombre</span> ▾
+                        </button>
+                        <div id="sort-dropdown" class="hidden absolute right-0 mt-1 bg-white dark:bg-[#2a2a2a] rounded-lg shadow-lg z-10 overflow-hidden" style="border:1px solid #333;min-width:150px;">
+                            <div onclick="setSortAndClose('name', 'Nombre')" class="px-4 py-2 text-sm dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#333] cursor-pointer">Nombre A-Z</div>
+                            <div onclick="setSortAndClose('name-desc', 'Nombre Z-A')" class="px-4 py-2 text-sm dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#333] cursor-pointer">Nombre Z-A</div>
+                            <div onclick="setSortAndClose('price-asc', 'Precio ↑')" class="px-4 py-2 text-sm dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#333] cursor-pointer">Precio menor</div>
+                            <div onclick="setSortAndClose('price-desc', 'Precio ↓')" class="px-4 py-2 text-sm dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#333] cursor-pointer">Precio mayor</div>
+                            <div onclick="setSortAndClose('stock-asc', 'Stock ↑')" class="px-4 py-2 text-sm dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#333] cursor-pointer">Stock menor</div>
+                            <div onclick="setSortAndClose('stock-desc', 'Stock ↓')" class="px-4 py-2 text-sm dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#333] cursor-pointer">Stock mayor</div>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <button onclick="toggleDropdown('view-dropdown')"
+                            class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                            Vista: <span id="view-label">Lista</span> ▾
+                        </button>
+                        <div id="view-dropdown" class="hidden absolute right-0 mt-1 bg-white dark:bg-[#2a2a2a] rounded-lg shadow-lg z-10 overflow-hidden" style="border:1px solid #333;min-width:120px;">
+                            <div onclick="setViewAndClose('list')" class="px-4 py-2 text-sm dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#333] cursor-pointer">☰ Lista</div>
+                            <div onclick="setViewAndClose('grid')" class="px-4 py-2 text-sm dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#333] cursor-pointer">⊞ Grid</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
             <input id="search-input" type="text" placeholder="Buscar producto o escanear código..."
                 class="w-full border border-gray-300 dark:border-[#333] dark:bg-[#222] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-4 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <div class="flex-1 overflow-y-auto">
-                <table class="w-full bg-white dark:bg-[#222] rounded-lg shadow text-sm" style="border:1px solid #2a2a2a;">
-                    <thead class="bg-gray-50 dark:bg-[#2a2a2a] sticky top-0">
-                        <tr>
-                            <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Producto</th>
-                            <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Precio</th>
-                            <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-400">Stock</th>
-                            <th class="px-4 py-3"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="products-table">
-                        <tr><td colspan="4" class="px-4 py-3 text-gray-400">Cargando...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <div class="flex-1 overflow-y-auto" id="products-container"></div>
         </div>
 
         <div class="w-80 bg-white dark:bg-[#1e1e1e] flex flex-col shadow-lg" style="border-left:1px solid #2a2a2a;">
@@ -84,6 +113,7 @@
                     <div id="selected-student" class="hidden mt-2 p-2 bg-blue-50 dark:bg-blue-900 rounded-lg text-sm">
                         <span id="selected-student-name" class="font-semibold dark:text-blue-100"></span>
                         <span id="selected-student-balance" class="ml-2"></span>
+                        <div id="student-remaining" class="text-xs mt-1"></div>
                     </div>
                 </div>
             </div>

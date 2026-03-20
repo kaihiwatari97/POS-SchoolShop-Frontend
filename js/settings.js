@@ -1,4 +1,4 @@
-requireAdmin();
+requireAuth();
 
 function updateToggle() {
     const isDark = document.documentElement.classList.contains('dark');
