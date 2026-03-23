@@ -120,4 +120,5 @@ document.getElementById('search-input').addEventListener('input', function() {
     renderStudents(students.filter(s => s.name.toLowerCase().includes(q)));
 });
 
+document.querySelectorAll('input').forEach(input => input.setAttribute('autocomplete', 'off'));
 loadStudents();

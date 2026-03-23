@@ -437,3 +437,4 @@ if (viewLabel) viewLabel.textContent = currentView === 'list' ? 'Lista' : 'Grid'
 loadProducts();
 loadRecentStudents();
 document.getElementById('search-input').focus();
+document.querySelectorAll('input').forEach(input => input.setAttribute('autocomplete', 'off'));

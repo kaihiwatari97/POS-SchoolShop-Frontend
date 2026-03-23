@@ -51,4 +51,5 @@ async function deleteUser(id) {
     if (res.ok) { loadUsers(); } else { alert('Error al eliminar usuario'); }
 }
 
+document.querySelectorAll('input').forEach(input => input.setAttribute('autocomplete', 'off'));
 loadUsers();

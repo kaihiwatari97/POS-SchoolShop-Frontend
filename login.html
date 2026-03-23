@@ -29,23 +29,24 @@
         if (getToken()) window.location.href = 'index.html';
 
         async function login() {
-            const username = document.getElementById('input-username').value;
-            const password = document.getElementById('input-password').value;
-            if (!username || !password) { showError('Ingresa usuario y contraseña'); return; }
-            try {
-                const res = await fetch(`${API}/api/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json();
-                if (!res.ok) { showError('Usuario o contraseña incorrectos'); return; }
-                saveSession(data.token, data.role, data.username);
-                window.location.href = 'index.html';
-            } catch (e) {
-                showError('Error de conexión con la API');
-            }
-        }
+    const username = document.getElementById('input-username').value;
+    const password = document.getElementById('input-password').value;
+    if (!username || !password) { showError('Ingresa usuario y contraseña'); return; }
+    try {
+        const res = await fetch(`${API}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+        if (!res.ok) { showError(data.error || 'Usuario o contraseña incorrectos'); return; }
+        saveSession(data.token, data.role, data.username);
+        window.location.href = 'index.html';
+    } catch (e) {
+        showError('Error de conexión con la API');
+    }
+}
 
         function showError(msg) {
             const el = document.getElementById('error-msg');

@@ -128,4 +128,5 @@ document.getElementById('search-input').addEventListener('input', function() {
     renderProducts(products.filter(p => p.name.toLowerCase().includes(q)));
 });
 
+document.querySelectorAll('input').forEach(input => input.setAttribute('autocomplete', 'off'));
 loadProducts();
