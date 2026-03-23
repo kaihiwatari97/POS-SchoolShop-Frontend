@@ -1,1 +1,1 @@
-const API = 'http://localhost:8080';
+const API = 'https://pos-schoolshop-api-production.up.railway.app';
