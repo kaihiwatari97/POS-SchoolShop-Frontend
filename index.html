@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    <div id="drawer-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <!-- <div id="drawer-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
         <div class="bg-white dark:bg-[#222] rounded-2xl p-8 w-80 shadow-2xl text-center" style="border:1px solid #2a2a2a;">
             <div style="font-size:48px;" class="mb-4">🪙</div>
             <h3 class="text-lg font-bold mb-2 dark:text-gray-100">Cajón abierto</h3>
@@ -51,7 +51,27 @@
                 <span class="text-xs text-orange-500 font-semibold">Esperando...</span>
             </div>
         </div>
+    </div> -->
+
+    <div id="drawer-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-[#222] rounded-2xl p-8 w-80 shadow-2xl text-center" style="border:1px solid #2a2a2a;">
+        <div style="font-size:48px;" class="mb-4">🪙</div>
+        <h3 class="text-lg font-bold mb-2 dark:text-gray-100">Cajón abierto</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Cierra el cajón para terminar la venta</p>
+        <div class="flex items-center justify-center">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="34" fill="none" stroke="#2a2a2a" stroke-width="6"/>
+                <circle id="drawer-circle" cx="40" cy="40" r="34" fill="none" stroke="#f97316" stroke-width="6"
+                    stroke-linecap="round"
+                    stroke-dasharray="213.6"
+                    stroke-dashoffset="0"
+                    transform="rotate(-90 40 40)"
+                    style="transition: stroke-dashoffset 1s linear;"/>
+                <text id="drawer-countdown" x="40" y="47" text-anchor="middle" font-size="24" font-weight="bold" fill="#f97316">5</text>
+            </svg>
+        </div>
     </div>
+</div>
 
     <div id="sidebar"></div>
 

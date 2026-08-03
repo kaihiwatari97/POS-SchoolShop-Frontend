@@ -376,17 +376,39 @@ function hideDrawerModal() {
     document.getElementById('drawer-modal').classList.add('hidden');
 }
 
+// function waitForDrawerClose() {
+//     return new Promise(resolve => {
+//         const interval = setInterval(async () => {
+//             try {
+//                 const res = await fetch(`${API}/api/terminal/drawer/status`, { headers: authHeaders() });
+//                 const data = await res.json();
+//                 if (data.status === 'closed') {
+//                     clearInterval(interval);
+//                     resolve();
+//                 }
+//             } catch (e) {
+//                 clearInterval(interval);
+//                 resolve();
+//             }
+//         }, 1000);
+//     });
+// }
+
 function waitForDrawerClose() {
     return new Promise(resolve => {
-        const interval = setInterval(async () => {
-            try {
-                const res = await fetch(`${API}/api/terminal/drawer/status`, { headers: authHeaders() });
-                const data = await res.json();
-                if (data.status === 'closed') {
-                    clearInterval(interval);
-                    resolve();
-                }
-            } catch (e) {
+        let seconds = 5;
+        const circle = document.getElementById('drawer-circle');
+        const countdown = document.getElementById('drawer-countdown');
+        const circumference = 213.6;
+
+        circle.style.strokeDashoffset = '0';
+        countdown.textContent = seconds;
+
+        const interval = setInterval(() => {
+            seconds--;
+            countdown.textContent = seconds;
+            circle.style.strokeDashoffset = ((5 - seconds) / 5) * circumference;
+            if (seconds <= 0) {
                 clearInterval(interval);
                 resolve();
             }
