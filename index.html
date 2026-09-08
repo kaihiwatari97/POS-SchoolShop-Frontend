@@ -10,6 +10,7 @@
 </head>
 <body class="bg-gray-100 dark:bg-[#1a1a1a] h-screen flex transition-colors">
 
+    <!-- MODAL ORIGINAL DE COBRO (desactivado momentaneamente mientras se instala caja, impresora y scanner)
     <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white dark:bg-[#222] rounded-2xl p-6 w-80 shadow-2xl" style="border:1px solid #2a2a2a;">
             <h3 class="text-lg font-bold mb-4 dark:text-gray-100">Confirmar cobro</h3>
@@ -38,6 +39,36 @@
             <button onclick="processSale(true)" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold mb-2 hover:bg-green-700">Cobrar e imprimir ticket</button>
             <button onclick="processSale(false)" class="w-full py-3 bg-green-500 text-white rounded-lg font-bold mb-2 hover:bg-green-600">Cobrar sin ticket</button>
             <button onclick="closeModal()" class="w-full py-2 bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-200">Cancelar</button>
+        </div>
+    </div>
+    -->
+
+    <!-- MODAL TEMPORAL DE COBRO (quitar y descomentar el de arriba cuando ya haya caja, impresora y scanner) -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-[#222] rounded-2xl p-8 w-72 shadow-2xl text-center" style="border:1px solid #2a2a2a;">
+            <h3 class="text-xl font-bold mb-1 dark:text-gray-100">Cobrar</h3>
+            <p id="charge-total" class="text-2xl font-bold text-green-600 mb-6"></p>
+
+            <div id="charge-idle-state">
+                <button onclick="startChargeCountdown()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold mb-2 hover:bg-green-700">Cobrar</button>
+                <button onclick="closeModal()" class="w-full py-2 bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-200">Cancelar</button>
+            </div>
+
+            <div id="charge-counting-state" class="hidden">
+                <div class="flex items-center justify-center mb-2">
+                    <svg width="90" height="90" viewBox="0 0 90 90">
+                        <circle cx="45" cy="45" r="38" fill="none" stroke="#2a2a2a" stroke-width="7"/>
+                        <circle id="charge-circle" cx="45" cy="45" r="38" fill="none" stroke="#22c55e" stroke-width="7"
+                            stroke-linecap="round"
+                            stroke-dasharray="238.8"
+                            stroke-dashoffset="0"
+                            transform="rotate(-90 45 45)"
+                            style="transition: stroke-dashoffset 1s linear;"/>
+                        <text id="charge-countdown" x="45" y="53" text-anchor="middle" font-size="28" font-weight="bold" fill="#22c55e">3</text>
+                    </svg>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Procesando venta...</p>
+            </div>
         </div>
     </div>
 
@@ -72,6 +103,40 @@
         </div>
     </div>
 </div>
+
+    <div id="new-student-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-[#222] rounded-2xl p-6 w-96 shadow-2xl" style="border:1px solid #2a2a2a;">
+            <h3 class="text-lg font-bold mb-4 dark:text-gray-100">Agregar alumno</h3>
+            <div class="flex flex-col gap-3">
+                <input id="new-student-name" type="text" placeholder="Nombre completo"
+                    class="border dark:border-[#333] dark:bg-[#2a2a2a] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="new-student-level"
+                    class="border dark:border-[#333] dark:bg-[#2a2a2a] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Nivel</option>
+                    <option value="kinder">Kinder</option>
+                    <option value="primaria">Primaria</option>
+                    <option value="secundaria">Secundaria</option>
+                    <option value="preparatoria">Preparatoria</option>
+                </select>
+                <div class="flex gap-2 min-w-0">
+                    <div class="flex items-center min-w-0 flex-1 border dark:border-[#333] rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 dark:bg-[#2a2a2a]">
+                        <input id="new-student-grade" type="number" min="1" max="12" placeholder="Grado"
+                            class="min-w-0 flex-1 px-3 py-2 text-sm focus:outline-none dark:bg-[#2a2a2a] dark:text-gray-100 dark:placeholder-gray-600">
+                        <span class="pr-3 text-gray-400 text-sm select-none">°</span>
+                    </div>
+                    <input id="new-student-group" type="text" placeholder="Grupo"
+                        class="min-w-0 flex-1 border dark:border-[#333] dark:bg-[#2a2a2a] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        oninput="this.value = this.value.toUpperCase()" maxlength="2">
+                </div>
+                <input id="new-student-balance" type="number" placeholder="Saldo inicial"
+                    class="border dark:border-[#333] dark:bg-[#2a2a2a] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex gap-2 mt-4">
+                <button onclick="saveNewStudent()" class="flex-1 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">Guardar</button>
+                <button onclick="closeNewStudentModal()" class="flex-1 py-2 bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-200">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
     <div id="sidebar"></div>
 
@@ -118,7 +183,9 @@
             <div class="p-4 border-b dark:border-[#2a2a2a]">
                 <div class="flex gap-2 mb-3">
                     <button onclick="setPaymentMethod('CASH')" id="btn-cash" class="flex-1 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold">Efectivo</button>
+                    <button onclick="setPaymentMethod('CARD')" id="btn-card" class="flex-1 py-2 rounded-lg bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-400 text-sm font-semibold">Tarjeta</button>
                     <button onclick="setPaymentMethod('PREPAID_BALANCE')" id="btn-prepaid" class="flex-1 py-2 rounded-lg bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-400 text-sm font-semibold">Saldo</button>
+                    <button onclick="setPaymentMethod('FIADO')" id="btn-fiado" class="flex-1 py-2 rounded-lg bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-400 text-sm font-semibold">Fiado</button>
                 </div>
                 <div id="cash-section">
                     <input id="cash-input" type="number" placeholder="Monto recibido"
@@ -134,6 +201,20 @@
                         <span id="selected-student-name" class="font-semibold dark:text-blue-100"></span>
                         <span id="selected-student-balance" class="ml-2"></span>
                         <div id="student-remaining" class="text-xs mt-1"></div>
+                    </div>
+                </div>
+                <div id="fiado-section" class="hidden">
+                    <div class="flex gap-2 mb-2">
+                        <input id="fiado-student-search" type="text" placeholder="Buscar alumno..."
+                            class="flex-1 border dark:border-[#333] dark:bg-[#252525] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="searchStudentFiado(this.value)">
+                        <button onclick="openNewStudentModal()" title="Agregar alumno nuevo"
+                            class="w-9 h-9 flex-shrink-0 flex items-center justify-center bg-blue-600 text-white rounded-lg text-lg font-bold hover:bg-blue-700">+</button>
+                    </div>
+                    <div id="fiado-student-list" class="border dark:border-[#333] rounded-lg max-h-32 overflow-y-auto text-sm dark:bg-[#252525]"></div>
+                    <div id="fiado-recent-students" class="border dark:border-[#333] rounded-lg text-sm mt-2 dark:bg-[#252525]"></div>
+                    <div id="selected-student-fiado" class="hidden mt-2 p-2 bg-blue-50 dark:bg-blue-900 rounded-lg text-sm">
+                        <span id="selected-student-fiado-name" class="font-semibold dark:text-blue-100"></span>
+                        <span id="selected-student-fiado-balance" class="ml-2 text-xs text-gray-500 dark:text-gray-400"></span>
                     </div>
                 </div>
             </div>

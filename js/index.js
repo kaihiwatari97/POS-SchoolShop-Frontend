@@ -4,6 +4,7 @@ let products = [];
 let order = [];
 let paymentMethod = 'CASH';
 let selectedStudent = null;
+let selectedFiadoStudent = null;
 let currentView = localStorage.getItem('posView') || 'list';
 let currentSort = localStorage.getItem('posSort') || 'name';
 
@@ -17,9 +18,17 @@ async function loadRecentStudents() {
     const res = await fetch(`${API}/api/students`, { headers: authHeaders() });
     const students = await res.json();
     const recent = students.slice(0, 4);
+
     const container = document.getElementById('recent-students');
-    container.innerHTML = recent.map(s => `
-        <div onclick="selectStudent(${s.id}, '${s.name}', ${s.prepaidBalance})"
+    if (container) container.innerHTML = recentStudentsHtml(recent, 'selectStudent');
+
+    const fiadoContainer = document.getElementById('fiado-recent-students');
+    if (fiadoContainer) fiadoContainer.innerHTML = recentStudentsHtml(recent, 'selectStudentFiado');
+}
+
+function recentStudentsHtml(recent, selectFn) {
+    return recent.map(s => `
+        <div onclick="${selectFn}(${s.id}, '${s.name}', ${s.prepaidBalance})"
             class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] cursor-pointer border-b dark:border-[#333] last:border-0 flex justify-between items-center">
             <span class="font-semibold text-sm dark:text-gray-100">${s.name}</span>
             <span class="text-xs ${s.prepaidBalance < 20 ? 'text-orange-500' : 'text-green-600'}">$${s.prepaidBalance}</span>
@@ -247,9 +256,12 @@ function setPaymentMethod(method) {
     paymentMethod = method;
     document.getElementById('cash-section').classList.toggle('hidden', method !== 'CASH');
     document.getElementById('prepaid-section').classList.toggle('hidden', method !== 'PREPAID_BALANCE');
+    document.getElementById('fiado-section').classList.toggle('hidden', method !== 'FIADO');
     document.getElementById('change-row').classList.toggle('hidden', method !== 'CASH');
     document.getElementById('btn-cash').className = `flex-1 py-2 rounded-lg text-sm font-semibold ${method === 'CASH' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-400'}`;
+    document.getElementById('btn-card').className = `flex-1 py-2 rounded-lg text-sm font-semibold ${method === 'CARD' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-400'}`;
     document.getElementById('btn-prepaid').className = `flex-1 py-2 rounded-lg text-sm font-semibold ${method === 'PREPAID_BALANCE' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-400'}`;
+    document.getElementById('btn-fiado').className = `flex-1 py-2 rounded-lg text-sm font-semibold ${method === 'FIADO' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-400'}`;
     checkBalance();
 }
 
@@ -292,6 +304,84 @@ function selectStudent(id, name, balance) {
     checkBalance();
 }
 
+async function searchStudentFiado(query) {
+    if (query.length < 2) {
+        document.getElementById('fiado-student-list').innerHTML = '';
+        return;
+    }
+    const res = await fetch(`${API}/api/students`, { headers: authHeaders() });
+    const students = await res.json();
+    const filtered = students.filter(s => s.name.toLowerCase().includes(query.toLowerCase()));
+    const list = document.getElementById('fiado-student-list');
+    list.innerHTML = filtered.map(s => `
+        <div onclick="selectStudentFiado(${s.id}, '${s.name}', ${s.prepaidBalance})"
+            class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] cursor-pointer border-b dark:border-[#333] last:border-0">
+            <span class="font-semibold dark:text-gray-100">${s.name}</span>
+            <span class="ml-2 text-xs text-gray-400">$${s.prepaidBalance}</span>
+        </div>
+    `).join('');
+}
+
+function selectStudentFiado(id, name, balance) {
+    selectedFiadoStudent = { id, balance };
+    document.getElementById('fiado-student-list').innerHTML = '';
+    document.getElementById('fiado-student-search').value = '';
+    document.getElementById('fiado-recent-students').innerHTML = '';
+    document.getElementById('selected-student-fiado').classList.remove('hidden');
+    document.getElementById('selected-student-fiado-name').textContent = name;
+    document.getElementById('selected-student-fiado-balance').textContent = `Saldo actual: $${balance}`;
+}
+
+// Alta rápida de alumno desde el botón "+" del método Fiado
+function openNewStudentModal() {
+    document.getElementById('new-student-name').value = '';
+    document.getElementById('new-student-level').value = '';
+    document.getElementById('new-student-grade').value = '';
+    document.getElementById('new-student-group').value = '';
+    document.getElementById('new-student-balance').value = '';
+    document.getElementById('new-student-modal').classList.remove('hidden');
+}
+
+function closeNewStudentModal() {
+    document.getElementById('new-student-modal').classList.add('hidden');
+}
+
+async function saveNewStudent() {
+    const body = {
+        name: document.getElementById('new-student-name').value,
+        grade: document.getElementById('new-student-grade').value,
+        level: document.getElementById('new-student-level').value,
+        group: document.getElementById('new-student-group').value,
+        prepaidBalance: parseFloat(document.getElementById('new-student-balance').value) || 0
+    };
+    if (!body.name) { alert('El nombre es obligatorio'); return; }
+
+    try {
+        const res = await fetch(`${API}/api/students`, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify(body)
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) { alert('Error al guardar alumno'); return; }
+
+        closeNewStudentModal();
+        loadRecentStudents();
+
+        // Si el backend regresa el alumno creado (con id), se selecciona automáticamente para el fiado.
+        // Si no regresa el id, hay que buscarlo manualmente en la lista.
+        if (data && data.id) {
+            selectStudentFiado(data.id, data.name || body.name, data.prepaidBalance ?? body.prepaidBalance);
+        } else {
+            alert('Alumno agregado. Búscalo en la lista para seleccionarlo.');
+        }
+    } catch (e) {
+        alert('Error al guardar alumno');
+    }
+}
+
+/* ==== LÓGICA ORIGINAL DE COBRO (desactivada momentaneamente mientras se instala caja, impresora y scanner) ====
+
 function openModal() {
     if (order.length === 0) { alert('Agrega productos a la orden'); return; }
     if (paymentMethod === 'PREPAID_BALANCE' && !selectedStudent) { alert('Selecciona un alumno'); return; }
@@ -320,10 +410,6 @@ function openModal() {
     }
 
     document.getElementById('confirm-modal').classList.remove('hidden');
-}
-
-function closeModal() {
-    document.getElementById('confirm-modal').classList.add('hidden');
 }
 
 async function processSale(printTicket) {
@@ -361,6 +447,85 @@ async function processSale(printTicket) {
             hideDrawerModal();
         }
 
+        finalizeSale();
+    } catch (e) {
+        closeModal();
+        alert('Error al procesar la venta');
+    }
+}
+
+==== FIN LÓGICA ORIGINAL ==== */
+
+function openModal() {
+    if (order.length === 0) { alert('Agrega productos a la orden'); return; }
+    if (paymentMethod === 'PREPAID_BALANCE' && !selectedStudent) { alert('Selecciona un alumno'); return; }
+    if (paymentMethod === 'FIADO' && !selectedFiadoStudent) { alert('Selecciona un alumno'); return; }
+
+    const total = order.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    if (paymentMethod === 'PREPAID_BALANCE' && selectedStudent.balance < total) {
+        alert(`Saldo insuficiente. Faltan $${(total - selectedStudent.balance).toFixed(2)}`);
+        return;
+    }
+
+    document.getElementById('charge-total').textContent = `$${total.toFixed(2)}`;
+    document.getElementById('confirm-modal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('confirm-modal').classList.add('hidden');
+    resetChargeModal();
+}
+
+function resetChargeModal() {
+    document.getElementById('charge-idle-state').classList.remove('hidden');
+    document.getElementById('charge-counting-state').classList.add('hidden');
+}
+
+function startChargeCountdown() {
+    document.getElementById('charge-idle-state').classList.add('hidden');
+    document.getElementById('charge-counting-state').classList.remove('hidden');
+
+    let seconds = 3;
+    const circle = document.getElementById('charge-circle');
+    const countdown = document.getElementById('charge-countdown');
+    const circumference = 238.8;
+
+    circle.style.strokeDashoffset = '0';
+    countdown.textContent = seconds;
+
+    const interval = setInterval(() => {
+        seconds--;
+        if (seconds > 0) {
+            countdown.textContent = seconds;
+            circle.style.strokeDashoffset = ((3 - seconds) / 3) * circumference;
+        } else {
+            clearInterval(interval);
+            circle.style.strokeDashoffset = circumference;
+            countdown.textContent = '✓';
+            processSaleTemp();
+        }
+    }, 1000);
+}
+
+// Venta simplificada mientras no hay caja, impresora ni scanner: solo registra la venta, sin ticket ni cajón.
+async function processSaleTemp() {
+    const body = {
+        paymentMethod,
+        items: order.map(i => ({ productId: i.productId, quantity: i.quantity }))
+    };
+    if (paymentMethod === 'PREPAID_BALANCE') body.studentId = selectedStudent.id;
+    if (paymentMethod === 'FIADO') body.studentId = selectedFiadoStudent.id;
+
+    try {
+        const res = await fetch(`${API}/api/sales`, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) { closeModal(); alert(data.error); return; }
+
+        closeModal();
         finalizeSale();
     } catch (e) {
         closeModal();
@@ -419,8 +584,10 @@ function waitForDrawerClose() {
 function finalizeSale() {
     order = [];
     selectedStudent = null;
+    selectedFiadoStudent = null;
     document.getElementById('cash-input').value = '';
     document.getElementById('selected-student').classList.add('hidden');
+    document.getElementById('selected-student-fiado').classList.add('hidden');
     renderOrder();
     loadProducts();
     loadRecentStudents();
