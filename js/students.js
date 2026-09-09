@@ -2,7 +2,6 @@ requireAdmin();
 
 let students = [];
 let editingId = null;
-let balanceStudentId = null;
 
 async function loadStudents() {
     const res = await fetch(`${API}/api/students`, { headers: authHeaders() });
@@ -29,10 +28,6 @@ function renderStudents(list) {
             </td>
             <td class="px-4 py-3">
                 <div class="flex gap-2 justify-end">
-                    <button onclick="openBalanceModal(${s.id}, '${s.name}', ${s.prepaidBalance})"
-                        class="px-3 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700">
-                        Cargar saldo
-                    </button>
                     <button onclick="openStudentModal(${s.id})"
                         class="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">
                         Editar
@@ -56,13 +51,11 @@ function openStudentModal(id = null) {
         document.getElementById('input-grade').value = s.grade || '';
         document.getElementById('input-level').value = s.level || '';
         document.getElementById('input-group').value = s.group || '';
-        document.getElementById('input-balance').value = s.prepaidBalance;
     } else {
         document.getElementById('input-name').value = '';
         document.getElementById('input-grade').value = '';
-        document.getElementById('input-level').value = '';
+        document.getElementById('input-level').value = 'kinder';
         document.getElementById('input-group').value = '';
-        document.getElementById('input-balance').value = '';
     }
     document.getElementById('student-modal').classList.remove('hidden');
 }
@@ -77,36 +70,13 @@ async function saveStudent() {
         name: document.getElementById('input-name').value,
         grade: document.getElementById('input-grade').value,
         level: document.getElementById('input-level').value,
-        group: document.getElementById('input-group').value,
-        prepaidBalance: parseFloat(document.getElementById('input-balance').value) || 0
+        group: document.getElementById('input-group').value
     };
     if (!body.name) { alert('El nombre es obligatorio'); return; }
     const url = editingId ? `${API}/api/students/${editingId}` : `${API}/api/students`;
     const method = editingId ? 'PUT' : 'POST';
     const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
     if (res.ok) { closeStudentModal(); loadStudents(); } else { alert('Error al guardar alumno'); }
-}
-
-function openBalanceModal(id, name, currentBalance) {
-    balanceStudentId = id;
-    document.getElementById('balance-modal-name').textContent = name;
-    document.getElementById('balance-modal-current').textContent = `$${currentBalance}`;
-    document.getElementById('input-add-balance').value = '';
-    document.getElementById('balance-modal').classList.remove('hidden');
-}
-
-function closeBalanceModal() {
-    document.getElementById('balance-modal').classList.add('hidden');
-    balanceStudentId = null;
-}
-
-async function addBalance() {
-    const amount = parseFloat(document.getElementById('input-add-balance').value);
-    if (!amount || amount <= 0) { alert('Ingresa un monto válido'); return; }
-    const student = students.find(s => s.id === balanceStudentId);
-    const body = { name: student.name, grade: student.grade, level: student.level, group: student.group, prepaidBalance: student.prepaidBalance + amount };
-    const res = await fetch(`${API}/api/students/${balanceStudentId}`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify(body) });
-    if (res.ok) { closeBalanceModal(); loadStudents(); } else { alert('Error al cargar saldo'); }
 }
 
 async function deleteStudent(id) {

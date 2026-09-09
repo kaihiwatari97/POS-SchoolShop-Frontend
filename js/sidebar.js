@@ -11,8 +11,10 @@ const sidebarHTML = `
     <a href="index.html" class="w-12 h-10 rounded-lg flex items-center justify-center text-xl" style="background:${location.pathname.includes('index') || location.pathname.endsWith('/') ? '#2a2a2a' : 'transparent'}">🛒</a>
     ${isAdmin ? `
     <a href="students.html" class="w-12 h-10 rounded-lg flex items-center justify-center text-xl" style="background:${location.pathname.includes('students') ? '#2a2a2a' : 'transparent'}">👥</a>
+    <a href="balance.html" class="w-12 h-10 rounded-lg flex items-center justify-center text-xl" style="background:${location.pathname.includes('balance') ? '#2a2a2a' : 'transparent'}">💰</a>
     <a href="inventory.html" class="w-12 h-10 rounded-lg flex items-center justify-center text-xl" style="background:${location.pathname.includes('inventory') ? '#2a2a2a' : 'transparent'}">📦</a>
     <a href="reports.html" class="w-12 h-10 rounded-lg flex items-center justify-center text-xl" style="background:${location.pathname.includes('reports') ? '#2a2a2a' : 'transparent'}">📊</a>
+    <a href="history.html" class="w-12 h-10 rounded-lg flex items-center justify-center text-xl" style="background:${location.pathname.includes('history') ? '#2a2a2a' : 'transparent'}">📜</a>
     <a href="users.html" class="w-12 h-10 rounded-lg flex items-center justify-center text-xl" style="background:${location.pathname.includes('users') ? '#2a2a2a' : 'transparent'}">🔑</a>` : ''}
     <div class="flex-1"></div>
     <div style="width:60px;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:8px;padding:5px 4px;text-align:center;margin-bottom:2px;">

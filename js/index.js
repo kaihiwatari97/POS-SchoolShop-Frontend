@@ -335,10 +335,9 @@ function selectStudentFiado(id, name, balance) {
 // Alta rápida de alumno desde el botón "+" del método Fiado
 function openNewStudentModal() {
     document.getElementById('new-student-name').value = '';
-    document.getElementById('new-student-level').value = '';
+    document.getElementById('new-student-level').value = 'kinder';
     document.getElementById('new-student-grade').value = '';
     document.getElementById('new-student-group').value = '';
-    document.getElementById('new-student-balance').value = '';
     document.getElementById('new-student-modal').classList.remove('hidden');
 }
 
@@ -351,8 +350,7 @@ async function saveNewStudent() {
         name: document.getElementById('new-student-name').value,
         grade: document.getElementById('new-student-grade').value,
         level: document.getElementById('new-student-level').value,
-        group: document.getElementById('new-student-group').value,
-        prepaidBalance: parseFloat(document.getElementById('new-student-balance').value) || 0
+        group: document.getElementById('new-student-group').value
     };
     if (!body.name) { alert('El nombre es obligatorio'); return; }
 
@@ -371,7 +369,7 @@ async function saveNewStudent() {
         // Si el backend regresa el alumno creado (con id), se selecciona automáticamente para el fiado.
         // Si no regresa el id, hay que buscarlo manualmente en la lista.
         if (data && data.id) {
-            selectStudentFiado(data.id, data.name || body.name, data.prepaidBalance ?? body.prepaidBalance);
+            selectStudentFiado(data.id, data.name || body.name, data.prepaidBalance ?? 0);
         } else {
             alert('Alumno agregado. Búscalo en la lista para seleccionarlo.');
         }
