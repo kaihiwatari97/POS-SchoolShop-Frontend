@@ -20,17 +20,23 @@ async function loadRecentStudents() {
     const recent = students.slice(0, 4);
 
     const container = document.getElementById('recent-students');
-    if (container) container.innerHTML = recentStudentsHtml(recent, 'selectStudent');
+    if (container) {
+        container.innerHTML = recentStudentsHtml(recent, 'selectStudent');
+        container.classList.remove('hidden');
+    }
 
     const fiadoContainer = document.getElementById('fiado-recent-students');
-    if (fiadoContainer) fiadoContainer.innerHTML = recentStudentsHtml(recent, 'selectStudentFiado');
+    if (fiadoContainer) {
+        fiadoContainer.innerHTML = recentStudentsHtml(recent, 'selectStudentFiado');
+        fiadoContainer.classList.remove('hidden');
+    }
 }
 
 function recentStudentsHtml(recent, selectFn) {
     return recent.map(s => `
         <div onclick="${selectFn}(${s.id}, '${s.name}', ${s.prepaidBalance})"
             class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] cursor-pointer border-b dark:border-[#333] last:border-0 flex justify-between items-center">
-            <span class="font-semibold text-sm dark:text-gray-100">${s.name}</span>
+            <span class="font-semibold text-sm dark:text-gray-100">${studentDisplayLabel(s)}</span>
             <span class="text-xs ${s.prepaidBalance < 20 ? 'text-orange-500' : 'text-green-600'}">$${s.prepaidBalance}</span>
         </div>
     `).join('');
@@ -252,7 +258,26 @@ function checkBalance() {
     }
 }
 
+function resetPaymentInputs() {
+    document.getElementById('cash-input').value = '';
+
+    document.getElementById('student-search').value = '';
+    document.getElementById('student-list').innerHTML = '';
+    const recentEl = document.getElementById('recent-students');
+    if (recentEl) recentEl.classList.remove('hidden');
+    selectedStudent = null;
+    document.getElementById('selected-student').classList.add('hidden');
+
+    document.getElementById('fiado-student-search').value = '';
+    document.getElementById('fiado-student-list').innerHTML = '';
+    const fiadoRecentEl = document.getElementById('fiado-recent-students');
+    if (fiadoRecentEl) fiadoRecentEl.classList.remove('hidden');
+    selectedFiadoStudent = null;
+    document.getElementById('selected-student-fiado').classList.add('hidden');
+}
+
 function setPaymentMethod(method) {
+    resetPaymentInputs();
     paymentMethod = method;
     document.getElementById('cash-section').classList.toggle('hidden', method !== 'CASH');
     document.getElementById('prepaid-section').classList.toggle('hidden', method !== 'PREPAID_BALANCE');
@@ -263,6 +288,10 @@ function setPaymentMethod(method) {
     document.getElementById('btn-prepaid').className = `flex-1 py-2 rounded-lg text-sm font-semibold ${method === 'PREPAID_BALANCE' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-400'}`;
     document.getElementById('btn-fiado').className = `flex-1 py-2 rounded-lg text-sm font-semibold ${method === 'FIADO' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-400'}`;
     checkBalance();
+
+    if (method === 'CASH') document.getElementById('cash-input').focus();
+    else if (method === 'PREPAID_BALANCE') document.getElementById('student-search').focus();
+    else if (method === 'FIADO') document.getElementById('fiado-student-search').focus();
 }
 
 function calcChange() {
@@ -273,19 +302,47 @@ function calcChange() {
     document.getElementById('change-display').className = `font-semibold ${change < 0 ? 'text-red-500' : 'text-green-600'}`;
 }
 
+function studentDisplayLabel(s) {
+    return s.controlNumber ? `${s.controlNumber} - ${s.name}` : s.name;
+}
+
+function rankStudents(students, query) {
+    const q = query.toLowerCase().trim();
+    return students
+        .map(s => {
+            const name = s.name.toLowerCase();
+            const control = s.controlNumber || '';
+            let score;
+            if (control === query || name === q) score = 0;
+            else if (control.startsWith(query)) score = 1;
+            else if (name.split(' ').some(part => part.startsWith(q))) score = 2;
+            else if (control.includes(query)) score = 3;
+            else if (name.includes(q)) score = 4;
+            else score = null;
+            return { s, score };
+        })
+        .filter(x => x.score !== null)
+        .sort((a, b) => a.score - b.score || a.s.name.length - b.s.name.length)
+        .slice(0, 3)
+        .map(x => x.s);
+}
+
 async function searchStudent(query) {
-    if (query.length < 2) {
+    const recentEl = document.getElementById('recent-students');
+    if (query.length === 0) {
         document.getElementById('student-list').innerHTML = '';
+        if (recentEl) recentEl.classList.remove('hidden');
         return;
     }
+    if (recentEl) recentEl.classList.add('hidden');
     const res = await fetch(`${API}/api/students`, { headers: authHeaders() });
     const students = await res.json();
-    const filtered = students.filter(s => s.name.toLowerCase().includes(query.toLowerCase()));
+    const filtered = rankStudents(students, query);
     const list = document.getElementById('student-list');
     list.innerHTML = filtered.map(s => `
         <div onclick="selectStudent(${s.id}, '${s.name}', ${s.prepaidBalance})"
             class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] cursor-pointer border-b dark:border-[#333] last:border-0">
-            <span class="font-semibold dark:text-gray-100">${s.name}</span>
+            <span class="font-semibold dark:text-gray-100">${studentDisplayLabel(s)}</span>
             <span class="ml-2 ${s.prepaidBalance < 20 ? 'text-orange-500' : 'text-green-600'}">$${s.prepaidBalance}</span>
         </div>
     `).join('');
@@ -305,18 +362,21 @@ function selectStudent(id, name, balance) {
 }
 
 async function searchStudentFiado(query) {
-    if (query.length < 2) {
+    const recentEl = document.getElementById('fiado-recent-students');
+    if (query.length === 0) {
         document.getElementById('fiado-student-list').innerHTML = '';
+        if (recentEl) recentEl.classList.remove('hidden');
         return;
     }
+    if (recentEl) recentEl.classList.add('hidden');
     const res = await fetch(`${API}/api/students`, { headers: authHeaders() });
     const students = await res.json();
-    const filtered = students.filter(s => s.name.toLowerCase().includes(query.toLowerCase()));
+    const filtered = rankStudents(students, query);
     const list = document.getElementById('fiado-student-list');
     list.innerHTML = filtered.map(s => `
         <div onclick="selectStudentFiado(${s.id}, '${s.name}', ${s.prepaidBalance})"
             class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] cursor-pointer border-b dark:border-[#333] last:border-0">
-            <span class="font-semibold dark:text-gray-100">${s.name}</span>
+            <span class="font-semibold dark:text-gray-100">${studentDisplayLabel(s)}</span>
             <span class="ml-2 text-xs text-gray-400">$${s.prepaidBalance}</span>
         </div>
     `).join('');
@@ -334,7 +394,10 @@ function selectStudentFiado(id, name, balance) {
 
 // Alta rápida de alumno desde el botón "+" del método Fiado
 function openNewStudentModal() {
-    document.getElementById('new-student-name').value = '';
+    document.getElementById('new-student-first-name').value = '';
+    document.getElementById('new-student-paternal-last-name').value = '';
+    document.getElementById('new-student-maternal-last-name').value = '';
+    document.getElementById('new-student-control-number').value = '';
     document.getElementById('new-student-level').value = 'kinder';
     document.getElementById('new-student-grade').value = '';
     document.getElementById('new-student-group').value = '';
@@ -347,12 +410,16 @@ function closeNewStudentModal() {
 
 async function saveNewStudent() {
     const body = {
-        name: document.getElementById('new-student-name').value,
+        firstName: document.getElementById('new-student-first-name').value.trim(),
+        paternalLastName: document.getElementById('new-student-paternal-last-name').value.trim(),
+        maternalLastName: document.getElementById('new-student-maternal-last-name').value.trim(),
+        controlNumber: document.getElementById('new-student-control-number').value.trim(),
         grade: document.getElementById('new-student-grade').value,
         level: document.getElementById('new-student-level').value,
         group: document.getElementById('new-student-group').value
     };
-    if (!body.name) { alert('El nombre es obligatorio'); return; }
+    if (!body.firstName || !body.paternalLastName || !body.maternalLastName) { alert('El nombre(s), apellido paterno y apellido materno son obligatorios'); return; }
+    if (!/^\d{8}$/.test(body.controlNumber)) { alert('El número de control debe tener exactamente 8 dígitos'); return; }
 
     try {
         const res = await fetch(`${API}/api/students`, {
@@ -361,7 +428,7 @@ async function saveNewStudent() {
             body: JSON.stringify(body)
         });
         const data = await res.json().catch(() => null);
-        if (!res.ok) { alert('Error al guardar alumno'); return; }
+        if (!res.ok) { alert(data && data.error ? data.error : 'Error al guardar alumno'); return; }
 
         closeNewStudentModal();
         loadRecentStudents();
@@ -369,7 +436,7 @@ async function saveNewStudent() {
         // Si el backend regresa el alumno creado (con id), se selecciona automáticamente para el fiado.
         // Si no regresa el id, hay que buscarlo manualmente en la lista.
         if (data && data.id) {
-            selectStudentFiado(data.id, data.name || body.name, data.prepaidBalance ?? 0);
+            selectStudentFiado(data.id, data.name || `${body.firstName} ${body.paternalLastName} ${body.maternalLastName}`, data.prepaidBalance ?? 0);
         } else {
             alert('Alumno agregado. Búscalo en la lista para seleccionarlo.');
         }
@@ -604,6 +671,47 @@ document.getElementById('search-input').addEventListener('keydown', function(e) 
             this.value = '';
         }
     }
+});
+
+// Detecta el escaneo de un código de barras aunque el foco esté en otro campo (ej. monto en
+// efectivo o búsqueda de alumno): los escáneres escriben cada carácter en milisegundos, mucho
+// más rápido que una persona, así que una racha de teclas con menos de 60ms entre sí que termine
+// en Enter y coincida con un código existente se trata como escaneo.
+let scanBuffer = '';
+let scanLastTime = 0;
+
+document.addEventListener('keydown', function(e) {
+    if (document.activeElement && document.activeElement.id === 'search-input') return;
+    if (e.ctrlKey || e.altKey || e.metaKey) return;
+    if (e.key !== 'Enter' && e.key.length !== 1) return;
+
+    const now = Date.now();
+    const gap = now - scanLastTime;
+    scanLastTime = now;
+
+    if (e.key === 'Enter') {
+        const code = scanBuffer;
+        scanBuffer = '';
+        if (code.length < 4 || gap > 60) return;
+
+        const product = products.find(p => p.barcode === code);
+        if (!product) return;
+
+        e.preventDefault();
+        const el = document.activeElement;
+        if (el && 'value' in el && el.value.endsWith(code)) {
+            el.value = el.value.slice(0, el.value.length - code.length);
+            if (el.id === 'student-search') searchStudent(el.value);
+            else if (el.id === 'fiado-student-search') searchStudentFiado(el.value);
+        }
+
+        if (product.stock > 0) addToOrder(product.id);
+        else alert(`Sin stock: ${product.name}`);
+        return;
+    }
+
+    if (gap > 60) scanBuffer = '';
+    scanBuffer += e.key;
 });
 
 document.getElementById('search-input').addEventListener('input', function() {

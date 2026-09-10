@@ -43,12 +43,32 @@
         </div>
     </div>
 
+    <div id="restock-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-[#222] rounded-2xl p-6 w-96 shadow-2xl overflow-hidden" style="border:1px solid #2a2a2a;">
+            <h3 class="text-lg font-bold mb-4 dark:text-gray-100">Agregar stock</h3>
+            <div class="flex flex-col gap-3">
+                <select id="restock-product"
+                    class="border dark:border-[#333] dark:bg-[#2a2a2a] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </select>
+                <input id="restock-amount" type="number" min="1" placeholder="Cantidad a agregar"
+                    class="border dark:border-[#333] dark:bg-[#2a2a2a] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex gap-2 mt-4">
+                <button onclick="saveRestock()" class="flex-1 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700">Agregar</button>
+                <button onclick="closeRestockModal()" class="flex-1 py-2 bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-200">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="sidebar"></div>
 
     <div class="flex-1 flex flex-col p-6 ml-20 overflow-hidden">
         <div class="flex justify-between items-center mb-4">
             <h1 class="text-xl font-bold dark:text-gray-100">Inventario</h1>
-            <button onclick="openProductModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">+ Agregar producto</button>
+            <div class="flex gap-2">
+                <button onclick="openRestockModal()" title="Agregar stock" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700">+</button>
+                <button onclick="openProductModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">+ Agregar producto</button>
+            </div>
         </div>
         <input id="search-input" type="text" placeholder="Buscar producto..."
             class="w-full border border-gray-300 dark:border-[#333] dark:bg-[#222] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">

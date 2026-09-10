@@ -117,6 +117,37 @@ async function saveProduct() {
     if (res.ok) { closeProductModal(); loadProducts(); } else { alert('Error al guardar producto'); }
 }
 
+function openRestockModal() {
+    const select = document.getElementById('restock-product');
+    select.innerHTML = products.map(p => `<option value="${p.id}">${p.name} (stock actual: ${p.stock})</option>`).join('');
+    document.getElementById('restock-amount').value = '';
+    document.getElementById('restock-modal').classList.remove('hidden');
+}
+
+function closeRestockModal() {
+    document.getElementById('restock-modal').classList.add('hidden');
+}
+
+async function saveRestock() {
+    const productId = document.getElementById('restock-product').value;
+    const amount = parseInt(document.getElementById('restock-amount').value);
+    if (!productId) { alert('Selecciona un producto'); return; }
+    if (!amount || amount <= 0) { alert('Ingresa una cantidad válida'); return; }
+
+    const res = await fetch(`${API}/api/products/${productId}/stock`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ amount })
+    });
+    if (res.ok) {
+        closeRestockModal();
+        loadProducts();
+    } else {
+        const data = await res.json().catch(() => null);
+        alert(data && data.error ? data.error : 'Error al agregar stock');
+    }
+}
+
 async function deleteProduct(id) {
     if (!confirm('¿Eliminar este producto?')) return;
     const res = await fetch(`${API}/api/products/${id}`, { method: 'DELETE', headers: authHeaders() });

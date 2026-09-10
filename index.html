@@ -108,8 +108,17 @@
         <div class="bg-white dark:bg-[#222] rounded-2xl p-6 w-96 shadow-2xl" style="border:1px solid #2a2a2a;">
             <h3 class="text-lg font-bold mb-4 dark:text-gray-100">Agregar alumno</h3>
             <div class="flex flex-col gap-3">
-                <input id="new-student-name" type="text" placeholder="Nombre completo"
+                <input id="new-student-first-name" type="text" placeholder="Nombre(s)"
                     class="border dark:border-[#333] dark:bg-[#2a2a2a] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="flex gap-2 min-w-0">
+                    <input id="new-student-paternal-last-name" type="text" placeholder="Apellido paterno"
+                        class="min-w-0 flex-1 border dark:border-[#333] dark:bg-[#2a2a2a] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input id="new-student-maternal-last-name" type="text" placeholder="Apellido materno"
+                        class="min-w-0 flex-1 border dark:border-[#333] dark:bg-[#2a2a2a] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <input id="new-student-control-number" type="text" placeholder="Número de control (8 dígitos)" maxlength="8" inputmode="numeric"
+                    class="border dark:border-[#333] dark:bg-[#2a2a2a] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    oninput="this.value = this.value.replace(/\D/g, '')">
                 <select id="new-student-level"
                     class="border dark:border-[#333] dark:bg-[#2a2a2a] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="kinder">Kinder</option>
@@ -190,7 +199,7 @@
                 </div>
                 <div id="prepaid-section" class="hidden">
                     <input id="student-search" type="text" placeholder="Buscar alumno..."
-                        class="w-full border dark:border-[#333] dark:bg-[#252525] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 mb-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="searchStudent(this.value)">
+                        class="w-full border dark:border-[#333] dark:bg-[#252525] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 mb-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="this.value = this.value.replace(/[^\p{L}\p{N}\s]/gu, ''); searchStudent(this.value)">
                     <div id="student-list" class="border dark:border-[#333] rounded-lg max-h-32 overflow-y-auto text-sm dark:bg-[#252525]"></div>
                     <div id="recent-students" class="border dark:border-[#333] rounded-lg text-sm mt-2 dark:bg-[#252525]"></div>
                     <div id="balance-warning" class="hidden text-red-400 text-xs font-semibold mb-2 p-2 bg-red-50 dark:bg-red-900 rounded-lg mt-2"></div>
@@ -203,7 +212,7 @@
                 <div id="fiado-section" class="hidden">
                     <div class="flex gap-2 mb-2">
                         <input id="fiado-student-search" type="text" placeholder="Buscar alumno..."
-                            class="flex-1 border dark:border-[#333] dark:bg-[#252525] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="searchStudentFiado(this.value)">
+                            class="flex-1 border dark:border-[#333] dark:bg-[#252525] dark:text-gray-100 dark:placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="this.value = this.value.replace(/[^\p{L}\p{N}\s]/gu, ''); searchStudentFiado(this.value)">
                         <button onclick="openNewStudentModal()" title="Agregar alumno nuevo"
                             class="w-9 h-9 flex-shrink-0 flex items-center justify-center bg-blue-600 text-white rounded-lg text-lg font-bold hover:bg-blue-700">+</button>
                     </div>
